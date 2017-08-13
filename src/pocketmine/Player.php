@@ -45,7 +45,6 @@ use pocketmine\event\inventory\InventoryCloseEvent;
 use pocketmine\event\inventory\InventoryPickupArrowEvent;
 use pocketmine\event\inventory\InventoryPickupItemEvent;
 use pocketmine\event\player\cheat\PlayerIllegalMoveEvent;
-use pocketmine\event\player\PlayerAchievementAwardedEvent;
 use pocketmine\event\player\PlayerAnimationEvent;
 use pocketmine\event\player\PlayerBedEnterEvent;
 use pocketmine\event\player\PlayerBedLeaveEvent;
@@ -234,7 +233,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/** @var Vector3 */
 	public $speed = null;
 
-	public $achievements = [];
 	/** @var SimpleTransactionGroup */
 	protected $currentTransaction = null;
 	public $craftingType = 0; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
@@ -666,28 +664,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	/**
-	 * @param string $achievementId
-	 */
-	public function removeAchievement($achievementId){
-		if($this->hasAchievement($achievementId)){
-			$this->achievements[$achievementId] = false;
-		}
-	}
-
-	/**
-	 * @param string $achievementId
-	 *
-	 * @return bool
-	 */
-	public function hasAchievement(string $achievementId) : bool{
-		if(!isset(Achievement::$list[$achievementId])){
-			return false;
-		}
-
-		return isset($this->achievements[$achievementId]) and $this->achievements[$achievementId] !== false;
-	}
-
-	/**
 	 * @return bool
 	 */
 	public function isConnected() : bool{
@@ -903,10 +879,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		$this->spawnToAll();
-
-		if($this->server->getUpdater()->hasUpdate() and $this->hasPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE) and $this->server->getProperty("auto-updater.on-update.warn-ops", true)){
-			$this->server->getUpdater()->showPlayerUpdate($this);
-		}
 
 		if($this->getHealth() <= 0){
 			$this->sendRespawnPacket($this->getSpawn());
@@ -1193,32 +1165,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	/**
-	 * @param string $achievementId
-	 *
-	 * @return bool
-	 */
-	public function awardAchievement(string $achievementId) : bool{
-		if(isset(Achievement::$list[$achievementId]) and !$this->hasAchievement($achievementId)){
-			foreach(Achievement::$list[$achievementId]["requires"] as $requirementId){
-				if(!$this->hasAchievement($requirementId)){
-					return false;
-				}
-			}
-			$this->server->getPluginManager()->callEvent($ev = new PlayerAchievementAwardedEvent($this, $achievementId));
-			if(!$ev->isCancelled()){
-				$this->achievements[$achievementId] = true;
-				Achievement::broadcast($this, $achievementId);
-
-				return true;
-			}else{
-				return false;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * @return int
 	 */
 	public function getGamemode() : int{
@@ -1457,15 +1403,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 						$this->server->getPluginManager()->callEvent($ev = new InventoryPickupItemEvent($this->inventory, $entity));
 						if($ev->isCancelled()){
 							continue;
-						}
-
-						switch($item->getId()){
-							case Item::WOOD:
-								$this->awardAchievement("mineWood");
-								break;
-							case Item::DIAMOND:
-								$this->awardAchievement("diamond");
-								break;
 						}
 
 						$pk = new TakeItemEntityPacket();
@@ -1808,13 +1745,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->namedtag["Pos"][2] = $this->level->getSpawnLocation()->z;
 		}else{
 			$this->setLevel($level);
-		}
-
-		$this->achievements = [];
-
-		/** @var ByteTag $achievement */
-		foreach($this->namedtag->Achievements as $achievement){
-			$this->achievements[$achievement->getName()] = $achievement->getValue() !== 0;
 		}
 
 		$this->namedtag->lastPlayed = new LongTag("lastPlayed", (int) floor(microtime(true) * 1000));
@@ -2839,25 +2769,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->currentTransaction->addTransaction($transaction);
 
 		if($this->currentTransaction->canExecute()){
-			$achievements = [];
-			foreach($this->currentTransaction->getTransactions() as $ts){
-				$inv = $ts->getInventory();
-				if($inv instanceof FurnaceInventory){
-					if($ts->getSlot() === 2){
-						switch($inv->getResult()->getId()){
-							case Item::IRON_INGOT:
-								$achievements[] = "acquireIron";
-								break;
-						}
-					}
-				}
-			}
-
-			if($this->currentTransaction->execute()){
-				foreach($achievements as $a){
-					$this->awardAchievement($a);
-				}
-			}
+			$this->currentTransaction->execute();
 
 			$this->currentTransaction = null;
 		}
@@ -2993,37 +2905,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		switch($recipe->getResult()->getId()){
-			case Item::CRAFTING_TABLE:
-				$this->awardAchievement("buildWorkBench");
-				break;
-			case Item::WOODEN_PICKAXE:
-				$this->awardAchievement("buildPickaxe");
-				break;
-			case Item::FURNACE:
-				$this->awardAchievement("buildFurnace");
-				break;
-			case Item::WOODEN_HOE:
-				$this->awardAchievement("buildHoe");
-				break;
-			case Item::BREAD:
-				$this->awardAchievement("makeBread");
-				break;
 			case Item::CAKE:
-				//TODO: detect complex recipes like cake that leave remains
-				$this->awardAchievement("bakeCake");
 				$this->inventory->addItem(Item::get(Item::BUCKET, 0, 3));
-				break;
-			case Item::STONE_PICKAXE:
-			case Item::GOLDEN_PICKAXE:
-			case Item::IRON_PICKAXE:
-			case Item::DIAMOND_PICKAXE:
-				$this->awardAchievement("buildBetterPickaxe");
-				break;
-			case Item::WOODEN_SWORD:
-				$this->awardAchievement("buildSword");
-				break;
-			case Item::DIAMOND:
-				$this->awardAchievement("diamond");
 				break;
 		}
 
@@ -3533,10 +3416,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->namedtag->SpawnX = new IntTag("SpawnX", (int) $this->spawnPosition->x);
 			$this->namedtag->SpawnY = new IntTag("SpawnY", (int) $this->spawnPosition->y);
 			$this->namedtag->SpawnZ = new IntTag("SpawnZ", (int) $this->spawnPosition->z);
-		}
-
-		foreach($this->achievements as $achievement => $status){
-			$this->namedtag->Achievements[$achievement] = new ByteTag($achievement, $status === true ? 1 : 0);
 		}
 
 		$this->namedtag["playerGameType"] = $this->gamemode;
