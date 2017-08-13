@@ -1463,19 +1463,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 			$diff = ($diffX ** 2 + $diffY ** 2 + $diffZ ** 2) / ($tickDiff ** 2);
 
-			if($this->isSurvival() and !$revert and $diff > 0.0625){
-				$ev = new PlayerIllegalMoveEvent($this, $newPos);
-				$ev->setCancelled($this->allowMovementCheats);
-
-				$this->server->getPluginManager()->callEvent($ev);
-
-				if(!$ev->isCancelled()){
-					$revert = true;
-					$this->server->getLogger()->warning($this->getServer()->getLanguage()->translateString("pocketmine.player.invalidMove", [$this->getName()]));
-					$this->server->getLogger()->debug("Old position: " . $this->asVector3() . ", new position: " . $this->newPosition);
-				}
-			}
-
 			if($diff > 0){
 				$this->x = $newPos->x;
 				$this->y = $newPos->y;
@@ -1621,21 +1608,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 						}
 						$this->inAirTicks = 0;
 					}else{
-						if(!$this->allowFlight and $this->inAirTicks > 10 and !$this->isSleeping() and !$this->isImmobile()){
-							$expectedVelocity = (-$this->gravity) / $this->drag - ((-$this->gravity) / $this->drag) * exp(-$this->drag * ($this->inAirTicks - $this->startAirTicks));
-							$diff = ($this->speed->y - $expectedVelocity) ** 2;
-
-							if(!$this->hasEffect(Effect::JUMP) and $diff > 0.6 and $expectedVelocity < $this->speed->y and !$this->server->getAllowFlight()){
-								if($this->inAirTicks < 100){
-									$this->setMotion(new Vector3(0, $expectedVelocity, 0));
-								}elseif($this->kick("Flying is not enabled on this server")){
-									$this->timings->stopTiming();
-
-									return false;
-								}
-							}
-						}
-
 						$this->inAirTicks += $tickDiff;
 					}
 				}
