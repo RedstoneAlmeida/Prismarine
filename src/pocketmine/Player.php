@@ -2042,6 +2042,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
 		//TODO: add events so plugins can change this
+		if($packet->sound === LevelSoundEventPacket::SOUND_ATTACK_NODAMAGE and $this->isSpectator()){
+ 			return false;
+ 		}
 		$this->getLevel()->addChunkPacket($this->chunk->getX(), $this->chunk->getZ(), $packet);
 		return true;
 	}
@@ -2069,6 +2072,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					}else{
 						$this->inventory->sendContents($this);
 					}
+					$this->level->broadcastLevelSoundEvent($this->add(0, 2, 0), LevelSoundEventPacket::SOUND_BURP);
 				}
 				break;
 			default:
@@ -2476,7 +2480,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 									$ev->getProjectile()->kill();
 								}else{
 									$ev->getProjectile()->spawnToAll();
-									$this->level->addSound(new LaunchSound($this), $this->getViewers());
+									$this->level->broadcastLevelSoundEvent($this, LevelSoundEventPacket::SOUND_BOW);
 								}
 							}else{
 								$ev->getProjectile()->spawnToAll();

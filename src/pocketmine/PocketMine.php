@@ -78,9 +78,9 @@ namespace pocketmine {
 	use pocketmine\wizard\SetupWizard;
 	use raklib\RakLib;
 
-	const VERSION = "1.6.2dev";
+	const VERSION = "1.0.0";
 	const API_VERSION = "3.0.0-ALPHA7";
-	const CODENAME = "Unleashed";
+	const CODENAME = "Apple Pie";
 
 	/*
 	 * Startup code. Do not look at it, it may harm you.
