@@ -2931,7 +2931,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		switch($recipe->getResult()->getId()){
 			case Item::CAKE:
 				$this->inventory->addItem(Item::get(Item::BUCKET, 0, 3));
-				return true;
+				break;
 		}
 
 
