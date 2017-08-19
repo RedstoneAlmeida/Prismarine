@@ -1459,7 +1459,7 @@ class Server{
 			}
 			$this->config = new Config($this->dataPath . "pocketmine.yml", Config::YAML, []);
 
-			$this->logger->info("Loading primarine.yml...");
+			$this->logger->info("Loading prismarine.yml...");
 			if(!file_exists($this->dataPath . "prismarine.yml")){
 				$content = file_get_contents($this->filePath . "src/pocketmine/resources/prismarine.yml");
 				@file_put_contents($this->dataPath . "prismarine.yml", $content);
