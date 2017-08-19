@@ -51,7 +51,7 @@ Tools
 -------------
 * [More information](https://github.com/iTXTech/Genisys/wiki/More-information)-->
 
-Licence
+License
 -------------
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
