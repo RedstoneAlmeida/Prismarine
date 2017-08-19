@@ -575,6 +575,7 @@ class PlayerInventory extends BaseInventory{
 			$pk->windowid = $id;
 			$pk->targetEid = $player->getId(); //TODO: check if this is correct
 			$player->dataPacket(clone $pk);
+			$this->sendHeldItem($player);
 		}
 	}
 
