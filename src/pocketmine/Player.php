@@ -1380,6 +1380,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			if($entity instanceof Arrow and $entity->hadCollision){
 				$item = Item::get(Item::ARROW, 0, 1);
 
+				if($this->isSurvival() and !$this->inventory->canAddItem($item)){
+ 					continue;
+ 				}
+
 				$this->server->getPluginManager()->callEvent($ev = new InventoryPickupArrowEvent($this->inventory, $entity));
 				if($ev->isCancelled()){
 					continue;
@@ -1397,6 +1401,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$item = $entity->getItem();
 
 					if($item instanceof Item){
+
+						if($this->isSurvival() and !$this->inventory->canAddItem($item)){
+ 							continue;
+ 						}
 
 						$this->server->getPluginManager()->callEvent($ev = new InventoryPickupItemEvent($this->inventory, $entity));
 						if($ev->isCancelled()){
