@@ -247,6 +247,9 @@ class Server{
 	/** @var Config */
 	private $config;
 
+	/** @var Config */
+	private $advancedConfig;
+
 	/** @var Player[] */
 	private $players = [];
 
@@ -261,6 +264,8 @@ class Server{
 
 	/** @var Level */
 	private $levelDefault = null;
+
+	public $allowInventoryCheats = false;
 
 	/**
 	 * @return string
@@ -1162,6 +1167,33 @@ class Server{
 		return $this->propertyCache[$variable] ?? $defaultValue;
 	}
 
+
+	/**
+	 * @param             $variable
+	 * @param null        $defaultValue
+	 * @param Config|null $cfg
+	 * @return bool|mixed|null
+	 */
+	public function getAdvancedProperty(string $variable, $defaultValue = null){
+		$vars = explode(".", $variable);
+		$base = array_shift($vars);
+		$cfg = $this->advancedConfig;
+		if($cfg->exists($base)){
+			$base = $cfg->get($base);
+		}else{
+			return $defaultValue;
+		}
+		while(count($vars) > 0){
+			$baseKey = array_shift($vars);
+			if(is_array($base) and isset($base[$baseKey])){
+				$base = $base[$baseKey];
+			}else{
+				return $defaultValue;
+			}
+		}
+		return $base;
+	}
+
 	/**
 	 * @param string $variable
 	 * @param string $defaultValue
@@ -1427,6 +1459,13 @@ class Server{
 			}
 			$this->config = new Config($this->dataPath . "pocketmine.yml", Config::YAML, []);
 
+			$this->logger->info("Loading primarine.yml...");
+			if(!file_exists($this->dataPath . "prismarine.yml")){
+				$content = file_get_contents($this->filePath . "src/pocketmine/resources/prismarine.yml");
+				@file_put_contents($this->dataPath . "prismarine.yml", $content);
+			}
+			$this->advancedConfig = new Config($this->dataPath . "prismarine.yml", Config::YAML, []);
+
 			$this->logger->info("Loading server properties...");
 			$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, [
 				"motd" => "Minecraft: PE Server",
@@ -1584,6 +1623,7 @@ class Server{
 			$this->pluginManager->subscribeToPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, $this->consoleSender);
 			$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
 			$this->profilingTickRate = (float) $this->getProperty("settings.profile-report-trigger", 20);
+			$this->allowInventoryCheats = $this->getAdvancedProperty("inventory.allow-cheats", false);
 			$this->pluginManager->registerInterface(PharPluginLoader::class);
 			$this->pluginManager->registerInterface(ScriptPluginLoader::class);
 

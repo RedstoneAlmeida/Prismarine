@@ -116,7 +116,7 @@ abstract class BaseInventory implements Inventory{
 	/**
 	 * @param Item[] $items
 	 */
-	public function setContents(array $items){
+	public function setContents(array $items, $send = true){
 		if(count($items) > $this->size){
 			$items = array_slice($items, 0, $this->size, true);
 		}
@@ -124,22 +124,22 @@ abstract class BaseInventory implements Inventory{
 		for($i = 0; $i < $this->size; ++$i){
 			if(!isset($items[$i])){
 				if(isset($this->slots[$i])){
-					$this->clear($i);
+					$this->clear($i, $send);
 				}
 			}else{
-				if(!$this->setItem($i, $items[$i])){
-					$this->clear($i);
+				if(!$this->setItem($i, $items[$i], $send)){
+					$this->clear($i, $send);
 				}
 			}
 		}
 	}
 
-	public function setItem(int $index, Item $item) : bool{
+	public function setItem(int $index, Item $item, $send = true) : bool{
 		$item = clone $item;
 		if($index < 0 or $index >= $this->size){
 			return false;
 		}elseif($item->getId() === 0 or $item->getCount() <= 0){
-			return $this->clear($index);
+			return $this->clear($index, $send);
 		}
 
 		$holder = $this->getHolder();
@@ -154,7 +154,7 @@ abstract class BaseInventory implements Inventory{
 
 		$old = $this->getItem($index);
 		$this->slots[$index] = clone $item;
-		$this->onSlotChange($index, $old);
+		$this->onSlotChange($index, $old, $send);
 
 		return true;
 	}
@@ -175,6 +175,15 @@ abstract class BaseInventory implements Inventory{
 		return false;
 	}
 
+	public function slotContains($slot, Item $item, $matchCount = false){
+ 		if($matchCount){
+ 			return $this->getItem($slot)->deepEquals($item, true, true, true);
+ 		}else{
+ 			return $this->getItem($slot)->deepEquals($item) and $this->getItem($slot)->getCount() >= $item->getCount();
+ 		}
+ 	}
+ 
+
 	public function all(Item $item) : array{
 		$slots = [];
 		$checkDamage = !$item->hasAnyDamageValue();
@@ -188,13 +197,13 @@ abstract class BaseInventory implements Inventory{
 		return $slots;
 	}
 
-	public function remove(Item $item){
+	public function remove(Item $item, $send = true){
 		$checkDamage = !$item->hasAnyDamageValue();
 		$checkTags = $item->hasCompoundTag();
 
 		foreach($this->getContents() as $index => $i){
 			if($item->equals($i, $checkDamage, $checkTags)){
-				$this->clear($index);
+				$this->clear($index, $send);
 			}
 		}
 	}
@@ -338,7 +347,7 @@ abstract class BaseInventory implements Inventory{
 		return $itemSlots;
 	}
 
-	public function clear(int $index) : bool{
+	public function clear(int $index, $send = true) : bool{
 		if(isset($this->slots[$index])){
 			$item = Item::get(Item::AIR, 0, 0);
 			$old = $this->slots[$index];
@@ -357,15 +366,15 @@ abstract class BaseInventory implements Inventory{
 				unset($this->slots[$index]);
 			}
 
-			$this->onSlotChange($index, $old);
+			$this->onSlotChange($index, $old, $send);
 		}
 
 		return true;
 	}
 
-	public function clearAll(){
+	public function clearAll($send = true){
 		foreach($this->getContents() as $index => $i){
-			$this->clear($index);
+			$this->clear($index, $send);
 		}
 	}
 
@@ -406,8 +415,14 @@ abstract class BaseInventory implements Inventory{
 		unset($this->viewers[spl_object_hash($who)]);
 	}
 
-	public function onSlotChange($index, $before){
-		$this->sendSlot($index, $this->getViewers());
+	public function onSlotChange($index, $before, $send){
+ 		if($send){
+ 			$this->sendSlot($index, $this->getViewers());
+ 		}
+ 	}
+ 
+ 	public function processSlotChange(Transaction $transaction): bool{
+ 		return true;
 	}
 
 

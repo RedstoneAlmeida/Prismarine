@@ -68,6 +68,7 @@ class Anvil extends Fallable{
 	public function onActivate(Item $item, Player $player = null){
 		if($player instanceof Player){
 			$player->addWindow(new AnvilInventory($this));
+			$player->craftingType = Player::CRAFTING_ANVIL;
 		}
 
 		return true;
