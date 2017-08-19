@@ -2648,7 +2648,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleContainerClose(ContainerClosePacket $packet) : bool{
-		if($this->spawned === false or $packet->windowid === 0 or $packet->windowid === 255){
+		if($this->spawned === false or $packet->windowid === 0){
 			return true;
 		}
 
