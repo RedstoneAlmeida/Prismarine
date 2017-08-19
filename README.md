@@ -1,4 +1,4 @@
-Genisys
+Prismarine
 ===================
 
 __An server software for Minecraft: Pocket Edition & Windows 10 Edition__
