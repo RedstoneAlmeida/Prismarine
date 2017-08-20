@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\inventory;
 
 use pocketmine\level\Position;
+use pocketmine\level\sound\AnvilUseSound;
 use pocketmine\Player;
 
 class AnvilInventory extends TemporaryInventory{
@@ -54,10 +55,14 @@ class AnvilInventory extends TemporaryInventory{
  			return false;
  		}
  
- 		if($player->getExpLevel() < $resultItem->getRepairCost()){ //Not enough exp
+ 		/*if($player->getExpLevel() < $resultItem->getRepairCost()){ //Not enough exp
  			return false;
   		}
- 		$player->setExpLevel($player->getExpLevel() - $resultItem->getRepairCost());
+ 		$player->setExpLevel($player->getExpLevel() - $resultItem->getRepairCost());*/
+
+ 		if(!$player->isCreative()){
+ 			return false; //Experience is not implemented yet. Only in creative.
+ 		}
  		
  		$this->clearAll();
  		if(!$player->getServer()->allowInventoryCheats and !$player->isCreative()){
@@ -66,6 +71,9 @@ class AnvilInventory extends TemporaryInventory{
  			}
  			$player->getFloatingInventory()->addItem($resultItem);
  		}
+
+ 		$player->getLevel()->addSound(new AnvilUseSound($player), [$player]);
+
  		return true;
  	}
  
