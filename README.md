@@ -1,4 +1,4 @@
-Prismarine
+Prismarine [![Build Status](https://travis-ci.org/PrismarineMC/Prismarine.svg?branch=master)](https://travis-ci.org/PrismarineMC/Prismarine) [![CircleCI](https://circleci.com/gh/PrismarineMC/Prismarine.svg?style=svg)](https://circleci.com/gh/PrismarineMC/Prismarine)
 ===================
 
 __An server software for Minecraft: Pocket Edition & Windows 10 Edition__
@@ -35,8 +35,8 @@ The following chats are bridged:
 
 Get Prismarine
 -------------
-<!--* Download the [latest build](https://storage.googleapis.com/itx-technologies-141911.appspot.com/genisys/Genisys-latest.phar).
-* Installation instructions can be found in the [wiki](https://github.com/iTXTech/Genisys/wiki).-->
+* Download the latest build from [Circle CI](https://circleci.com/gh/PrismarineMC/Prismarine).
+<!--* Installation instructions can be found in the [wiki](https://github.com/iTXTech/Genisys/wiki).-->
 * PHP Binaries [here](https://github.com/LeverylTeam/PHP7-Binaries).
 
 NOTE: **The master branch is the only officially supported branch.**
