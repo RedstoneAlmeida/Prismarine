@@ -2525,16 +2525,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
 
-				$realSpawn = $ev->getRespawnPosition()->add(0.5, 0, 0.5);
-
-				if($realSpawn->distanceSquared($this->getSpawn()->add(0.5, 0, 0.5)) > 0.01){
-					$this->teleport($realSpawn); //If the destination was modified by plugins
-				}else{
-					$this->setPosition($realSpawn); //The client will move to the position of its own accord once chunks are sent
-					$this->nextChunkOrderRun = 0;
-					$this->isTeleporting = true;
-					$this->newPosition = null;
-				}
+				$this->teleport($ev->getRespawnPosition());
 
 				$this->resetLastMovements();
 
@@ -2548,6 +2539,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				$this->removeAllEffects();
 				$this->setHealth($this->getMaxHealth());
+				$this->setFood(20);
 
 				foreach($this->attributeMap->getAll() as $attr){
 					$attr->resetToDefault();
