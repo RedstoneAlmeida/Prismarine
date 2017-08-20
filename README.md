@@ -36,9 +36,8 @@ The following chats are bridged:
 Get Prismarine
 -------------
 * Download the latest build from [Circle CI](https://circleci.com/gh/PrismarineMC/Prismarine).
-<!--* Installation instructions can be found in the [wiki](https://github.com/iTXTech/Genisys/wiki).-->
 * PHP Binaries [here](https://github.com/LeverylTeam/PHP7-Binaries).
-
+<!--* Installation instructions can be found in the [wiki](https://github.com/iTXTech/Genisys/wiki).-->
 NOTE: **The master branch is the only officially supported branch.**
 _All other branches are in testing and may be unstable. Do not use builds from other branches unless you are sure you understand the risks._
 
