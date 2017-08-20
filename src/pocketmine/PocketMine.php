@@ -79,8 +79,8 @@ namespace pocketmine {
 	use raklib\RakLib;
 
 	const VERSION = "1.0.0";
-	const API_VERSION = "3.0.0-ALPHA7";
-	const CODENAME = "Apple Pie";
+	const API_VERSION = "3.0.0";
+	const CODENAME = "Cake";
 
 	/*
 	 * Startup code. Do not look at it, it may harm you.
