@@ -1847,6 +1847,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->iusername = strtolower($this->username);
 		$this->setDataProperty(self::DATA_NAMETAG, self::DATA_TYPE_STRING, $this->username, false);
 
+		if($this->server->getConfigBoolean("online-mode", false) && $packet->identityPublicKey === null){
+			$this->kick("disconnectionScreen.notAuthenticated", false);
+			return true;
+		}
+
 		if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() and $this->kick("disconnectionScreen.serverFull", false)){
 			return true;
 		}
@@ -2775,9 +2780,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			 * In fact, TODO: Rewrite crafting entirely.
 			 */
 			$possibleRecipes = $this->server->getCraftingManager()->getRecipesByResult($packet->output[0]);
-			if(!$packet->output[0]->deepEquals($recipe->getResult())){
-				$this->server->getLogger()->debug("Mismatched desktop recipe received from player ".$this->getName().", expected ".$recipe->getResult().", got ".$packet->output[0]);
-			}
 			$recipe = null;
 			foreach($possibleRecipes as $r){
 				/* Check the ingredient list and see if it matches the ingredients we've put into the crafting grid
@@ -2794,8 +2796,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
  						$canCraft = false;
  						return true;
  					}
-					//This will only be reached if we have the item to take away.
-					$floatingInventory->removeItem($ingredient);
+ 					$floatingInventory->removeItem(clone $ingredient);
 				}
 				if($canCraft){
 					//Found a recipe that works, take it and run with it.
@@ -2820,88 +2821,73 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			if($recipe instanceof ShapedRecipe){
 				for($x = 0; $x < 3 and $canCraft; ++$x){
 					for($y = 0; $y < 3; ++$y){
+						/** @var Item $item */
 						$item = $packet->input[$y * 3 + $x];
 						$ingredient = $recipe->getIngredient($x, $y);
-						if($item->getCount() > 0 and $item->getId() > 0){
-							if($ingredient == null){
+						if($item->getCount() > 0){
+							if($ingredient === null or !$ingredient->equals($item, !$ingredient->hasAnyDamageValue(), $ingredient->hasCompoundTag())){
 								$canCraft = false;
-								return true;
+								break;
 							}
-							if($ingredient->getId() != 0 and !$ingredient->deepEquals($item, $ingredient->getDamage() !== null, $ingredient->getCompoundTag() !== null)){
-								$canCraft = false;
-								return true;
-							}
-
-						}elseif($ingredient !== null and $item->getId() !== 0){
-							$canCraft = false;
-						return true;
- 						}
- 					}
- 				}
- 			}elseif($recipe instanceof ShapelessRecipe){
+						}
+					}
+				}
+			}elseif($recipe instanceof ShapelessRecipe){
 				$needed = $recipe->getIngredientList();
 				for($x = 0; $x < 3 and $canCraft; ++$x){
 					for($y = 0; $y < 3; ++$y){
+						/** @var Item $item */
 						$item = clone $packet->input[$y * 3 + $x];
-
 						foreach($needed as $k => $n){
-							if($n->deepEquals($item, $n->getDamage() !== null, $n->getCompoundTag() !== null)){
+							if($n->equals($item, !$n->hasAnyDamageValue(), $n->hasCompoundTag())){
 								$remove = min($n->getCount(), $item->getCount());
 								$n->setCount($n->getCount() - $remove);
 								$item->setCount($item->getCount() - $remove);
-
 								if($n->getCount() === 0){
 									unset($needed[$k]);
 								}
 							}
 						}
-
 						if($item->getCount() > 0){
 							$canCraft = false;
-							return true;
+							break;
 						}
- 					}
- 				}
+					}
+				}
 				if(count($needed) > 0){
 					$canCraft = false;
 				}
 			}else{
- 				$canCraft = false;
- 			}
-			//Nasty hack. TODO: Get rid
-			$canCraft = true;//0.13.1大量物品本地配方出现问题,无法解决,使用极端(唯一)方法修复.
+				$canCraft = false;
+			}
 			/** @var Item[] $ingredients */
 			$ingredients = $packet->input;
 			$result = $packet->output[0];
- 
-			if(!$canCraft or !$recipe->getResult()->deepEquals($result)){
+			if(!$canCraft or !$recipe->getResult()->equals($result)){
 				$this->server->getLogger()->debug("Unmatched recipe " . $recipe->getId() . " from player " . $this->getName() . ": expected " . $recipe->getResult() . ", got " . $result . ", using: " . implode(", ", $ingredients));
 				$this->inventory->sendContents($this);
-				return true;
+				return false;
 			}
-
 			$used = array_fill(0, $this->inventory->getSize(), 0);
 			foreach($ingredients as $ingredient){
 				$slot = -1;
-				foreach($this->inventory->getContents() as $index => $i){
-					if($ingredient->getId() !== 0 and $ingredient->deepEquals($i, $ingredient->getDamage() !== null) and ($i->getCount() - $used[$index]) >= 1){
+				foreach($this->inventory->getContents() as $index => $item){
+					if($ingredient->getId() !== 0 and $ingredient->equals($item, !$ingredient->hasAnyDamageValue(), $ingredient->hasCompoundTag()) and ($item->getCount() - $used[$index]) >= 1){
 						$slot = $index;
 						$used[$index]++;
-						return true;
+						break;
 					}
 				}
-
 				if($ingredient->getId() !== 0 and $slot === -1){
 					$canCraft = false;
- 					return true;
- 				}
- 			}
- 
+					break;
+				}
+			}
 			if(!$canCraft){
 				$this->server->getLogger()->debug("Unmatched recipe " . $recipe->getId() . " from player " . $this->getName() . ": client does not have enough items, using: " . implode(", ", $ingredients));
 				$this->inventory->sendContents($this);
- 				return true;
- 			}
+				return false;
+			}
 			$this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($this, $ingredients, $recipe));
 			if($ev->isCancelled()){
 				$this->inventory->sendContents($this);
@@ -2919,13 +2905,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$newItem = Item::get(Item::AIR, 0, 0);
 				}
 				$this->inventory->setItem($slot, $newItem);
- 			}
+			}
 			$extraItem = $this->inventory->addItem($recipe->getResult());
-			if(count($extraItem) > 0){ //Could not add all the items to our inventory (not enough space)
+			if(count($extraItem) > 0){
 				foreach($extraItem as $item){
 					$this->level->dropItem($this, $item);
 				}
- 			}
+			}
  		}
 
 		switch($recipe->getResult()->getId()){
