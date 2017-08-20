@@ -8,7 +8,7 @@ timings/*
 server.properties
 /pocketmine.yml
 *.txt
-genisys.yml
+prismarine.yml
 crashdumps/*
 
 # Common IDEs
