@@ -2796,7 +2796,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
  						$canCraft = false;
  						return true;
  					}
- 					$floatingInventory->removeItem(clone $ingredient);
+ 					$floatingInventory->removeItem($ingredient);
 				}
 				if($canCraft){
 					//Found a recipe that works, take it and run with it.
