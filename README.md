@@ -10,7 +10,7 @@ Prismarine is a server software based on **[PocketMine-MP](https://github.com/pm
 Some of the extended functionality that Prismarine offers:
 
 <!--* Optional Xbox Live authentication //TODO-->
-* Support for Windows 10 Edition (#1)
+* Support for Windows 10 Edition - WIP
 
 However, Prismarine still has a long way to go. We welcome contributions.
 
