@@ -26,7 +26,7 @@ namespace pocketmine\inventory;
 use pocketmine\level\Position;
 use pocketmine\Player;
 
-class EnchantInventory extends ContainerInventory{
+class EnchantInventory extends TemporaryInventory{
 	public function __construct(Position $pos){
 		parent::__construct(new FakeBlockMenu($this, $pos), InventoryType::get(InventoryType::ENCHANT_TABLE));
 	}
@@ -36,6 +36,10 @@ class EnchantInventory extends ContainerInventory{
 	 */
 	public function getHolder(){
 		return $this->holder;
+	}
+
+	public function getResultSlotIndex(){
+		return -1; //enchanting tables don't have result slots, they modify the item in the target slot instead
 	}
 
 	public function onClose(Player $who){

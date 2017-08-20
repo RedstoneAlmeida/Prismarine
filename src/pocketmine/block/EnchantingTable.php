@@ -83,8 +83,8 @@ class EnchantingTable extends Transparent{
 	public function onActivate(Item $item, Player $player = null){
 		if($player instanceof Player){
 			//TODO lock
-
 			$player->addWindow(new EnchantInventory($this));
+			$player->craftingType = Player::CRAFTING_ENCHANT;
 		}
 
 		return true;

@@ -164,6 +164,10 @@ class CraftingManager{
 		return $this->recipes;
 	}
 
+	public function getRecipesByResult(Item $item){
+		return @array_values($this->recipeLookup[$item->getId() . ":" . $item->getDamage()]) ?? [];
+	}
+
 	/**
 	 * @return FurnaceRecipe[]
 	 */

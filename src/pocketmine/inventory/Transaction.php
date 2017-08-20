@@ -23,9 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use pocketmine\Player;
 use pocketmine\item\Item;
 
 interface Transaction{
+
+	//Transaction type constants
+	const TYPE_NORMAL = 0;
+	const TYPE_DROP_ITEM = 1;
 
 	/**
 	 * @return Inventory
@@ -36,12 +41,6 @@ interface Transaction{
 	 * @return int
 	 */
 	public function getSlot() : int;
-
-	/**
-	 * @return Item
-	 */
-	public function getSourceItem() : Item;
-
 	/**
 	 * @return Item
 	 */
@@ -51,4 +50,11 @@ interface Transaction{
 	 * @return float
 	 */
 	public function getCreationTime() : float;
+
+	/**
+	 * @param Player $source
+	 * @return bool
+	 */
+	public function execute(Player $source): bool;
+
 }

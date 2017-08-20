@@ -19,23 +19,18 @@
  *
 */
 
-declare(strict_types=1);
-
 namespace pocketmine\inventory;
 
 /**
- * Saves all the information regarding default inventory sizes and types
+ * The in-between inventory where items involved in transactions are stored temporarily
  */
-interface SlotType{
-	const RESULT = 0;
+class FloatingInventory extends BaseInventory{
 
-	const CRAFTING = 1; //Not used in Minecraft: PE yet
-
-	const ARMOR = 2;
-
-	const CONTAINER = 3;
-
-	const HOTBAR = 4;
-
-	const FUEL = 5;
+	/**
+	 * @param InventoryHolder $holder
+	 * @param InventoryType   $inventoryType
+	 */
+	public function __construct(InventoryHolder $holder){
+		parent::__construct($holder, InventoryType::get(InventoryType::PLAYER_FLOATING));
+	}
 }
