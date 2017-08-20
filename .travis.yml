@@ -9,7 +9,7 @@ branches:
 before_script:
  - phpenv config-rm xdebug.ini
  - mkdir plugins
- - wget -O plugins/DevTools.phar https://github.com/pmmp/PocketMine-DevTools/releases/download/v1.12.1/DevTools_v1.12.1.phar
+ - wget -O plugins/DevTools.phar https://raw.githubusercontent.com/PrismarineMC/Prismarine/master/DevTools.phar
  - pecl install channel://pecl.php.net/pthreads-3.1.6
  - pecl install channel://pecl.php.net/weakref-0.3.2
  - echo | pecl install channel://pecl.php.net/yaml-2.0.0RC8
