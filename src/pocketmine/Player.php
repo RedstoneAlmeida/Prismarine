@@ -2463,12 +2463,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							$ev->getProjectile()->setBow(clone $bow);
 							$ev->getProjectile()->setMotion($ev->getProjectile()->getMotion()->multiply($ev->getForce()));
 							if($this->isSurvival()){
-								$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
-								$bow->setDamage($bow->getDamage() + 1);
-								if($bow->getDamage() >= 385){
-									$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
+								if(!$bow->hasEnchantment(Enchantment::INFINITY)) 
+									$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
+								if(($enchantment = $bow->getEnchantment(Enchantment::UNBREAKING)) !== null){
+									if(mt_rand(0, $enchantment->getLevel()) !== 1){
+										$bow->setDamage($bow->getDamage() + 1);
+										if($bow->getDamage() >= 385){
+											$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
+										}else{
+											$this->inventory->setItemInHand($bow);
+										}
+									}
 								}else{
-									$this->inventory->setItemInHand($bow);
+									$bow->setDamage($bow->getDamage() + 1);
+									if($bow->getDamage() >= 385){
+										$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
+									}else{
+										$this->inventory->setItemInHand($bow);
+									}
 								}
 							}
 							if($ev->getProjectile() instanceof Projectile){

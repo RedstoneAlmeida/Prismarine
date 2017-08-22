@@ -60,6 +60,12 @@ abstract class Tool extends Item{
 			return true;
 		}
 
+		if(($enchantment = $this->getEnchantment(Enchantment::UNBREAKING)) !== null){
+			if(!(mt_rand(0, $enchantment->getLevel()) === 1)){
+				return true;
+			}
+		}
+
 		if($object instanceof Block){
 			if(
 				$object->getToolType() === Tool::TYPE_PICKAXE and $this->isPickaxe() or
@@ -121,6 +127,20 @@ abstract class Tool extends Item{
 	public function isUnbreakable(){
 		$tag = $this->getNamedTagEntry("Unbreakable");
 		return $tag !== null and $tag->getValue() > 0;
+	}
+
+	/**
+	 * @param bool $unbreakable
+	 *
+	 * @return $this
+	 */
+	public function setUnbreakable(bool $unbreakable){
+		$tag = $this->getNamedTag() ?? new CompoundTag("", []);
+		$tag->Unbreakable = new IntTag("Unbreakable", $unbreakable);
+
+		$this->setNamedTag($tag);
+
+		return $this;
 	}
 
 	public function isPickaxe(){
