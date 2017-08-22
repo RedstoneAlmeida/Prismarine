@@ -28,6 +28,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\AddEntityPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
+use pocketmine\item\Bow;
 
 class Arrow extends Projectile{
 	const NETWORK_ID = 80;
@@ -43,9 +44,20 @@ class Arrow extends Projectile{
 
 	protected $sound = true;
 
-	public function __construct(Level $level, CompoundTag $nbt, Entity $shootingEntity = null, bool $critical = false){
+	protected $bow;
+
+	public function __construct(Level $level, CompoundTag $nbt, Entity $shootingEntity = null, bool $critical = false, Bow $bow = null){
 		parent::__construct($level, $nbt, $shootingEntity);
 		$this->setCritical($critical);
+		$this->setBow($bow);
+	}
+
+	public function getBow() : Bow {
+		return $this->bow;
+	}
+
+	public function setBow(Bow $bow){
+		$this->bow = $bow;
 	}
 
 	public function isCritical() : bool{

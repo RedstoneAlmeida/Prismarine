@@ -29,6 +29,8 @@ namespace pocketmine\entity;
 use pocketmine\block\Block;
 use pocketmine\block\Water;
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityDamageByChildEntityEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDespawnEvent;
 use pocketmine\event\entity\EntityLevelChangeEvent;
 use pocketmine\event\entity\EntityMotionEvent;
@@ -37,6 +39,7 @@ use pocketmine\event\entity\EntitySpawnEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
 use pocketmine\event\Timings;
 use pocketmine\event\TimingsHandler;
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\level\Location;
@@ -845,6 +848,30 @@ abstract class Entity extends Location implements Metadatable{
 	 *
 	 */
 	public function attack($damage, EntityDamageEvent $source){
+		$cause = $source->getCause();
+		if($source instanceof EntityDamageByEntityEvent) {
+			if($cause === EntityDamageEvent::CAUSE_ENTITY_ATTACK){
+				if(($enchantment = $source->getDamager()->getInventory()->getItemInHand()->getEnchantment(Enchantment::KNOCKBACK)) !== null){
+					$source->setKnockback($source->getKnockback() * ($enchantment->getLevel() + 1));
+				}
+				if(($enchantment = $source->getDamager()->getInventory()->getItemInHand()->getEnchantment(Enchantment::SHARPNESS)) !== null){
+					$source->setDamage($enchantment->getLevel() * 1.5, EntityDamageEvent::MODIFIER_ENCHANTMENT_SHARPNESS);
+				}
+			}
+		}
+		if($source instanceof EntityDamageByChildEntityEvent) {
+			if($cause === EntityDamageEvent::CAUSE_PROJECTILE && $source->getChild() instanceof Arrow){
+				if(($bow = $source->getChild()->getBow()) !== null){
+					if(($enchantment = $bow->getEnchantment(Enchantment::PUNCH)) !== null){
+						$source->setKnockback($source->getKnockback() * ($enchantment->getLevel() + 1));
+					}
+					if(($enchantment = $bow->getEnchantment(Enchantment::POWER)) !== null){
+						$source->setDamage($enchantment->getLevel() * 1.5, EntityDamageEvent::MODIFIER_ENCHANTMENT_SHARPNESS);
+					}
+				}
+			}
+		}
+		
 		$this->server->getPluginManager()->callEvent($source);
 		if($source->isCancelled()){
 			return;

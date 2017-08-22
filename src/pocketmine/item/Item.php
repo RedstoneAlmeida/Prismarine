@@ -639,6 +639,73 @@ class Item implements ItemIds, \JsonSerializable{
 		return $enchantments;
 	}
 
+	public function hasRepairCost() : bool{
+		if(!$this->hasCompoundTag()){
+			return false;
+		}
+
+		$tag = $this->getNamedTag();
+		if(isset($tag->RepairCost)){
+			$tag = $tag->RepairCost;
+			if($tag instanceof IntTag){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public function getRepairCost() : int{
+		if(!$this->hasCompoundTag()){
+			return 1;
+		}
+
+		$tag = $this->getNamedTag();
+		if(isset($tag->display)){
+			$tag = $tag->RepairCost;
+			if($tag instanceof IntTag){
+				return $tag->getValue();
+			}
+		}
+
+		return 1;
+	}
+
+
+	public function setRepairCost(int $cost){
+		if($cost === 1){
+			$this->clearRepairCost();
+		}
+
+		if(!($hadCompoundTag = $this->hasCompoundTag())){
+			$tag = new CompoundTag("", []);
+		}else{
+			$tag = $this->getNamedTag();
+		}
+
+		$tag->RepairCost = new IntTag("RepairCost", $cost);
+
+		if(!$hadCompoundTag){
+			$this->setCompoundTag($tag);
+		}
+
+		return $this;
+	}
+
+	public function clearRepairCost(){
+		if(!$this->hasCompoundTag()){
+			return $this;
+		}
+		$tag = $this->getNamedTag();
+
+		if(isset($tag->RepairCost) and $tag->RepairCost instanceof IntTag){
+			unset($tag->RepairCost);
+			$this->setNamedTag($tag);
+		}
+
+		return $this;
+	}
+
 	/**
 	 * @return bool
 	 */

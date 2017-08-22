@@ -11,6 +11,7 @@ Some of the extended functionality that Prismarine offers:
 
 * Optional Xbox Live authentication
 * Support for Windows 10 Edition
+* Working enchantments - W.I.P - 5/26 of enchantments working
 
 However, Prismarine still has a long way to go. We welcome contributions.
 

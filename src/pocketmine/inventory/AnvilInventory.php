@@ -55,14 +55,10 @@ class AnvilInventory extends TemporaryInventory{
  			return false;
  		}
  
- 		/*if($player->getExpLevel() < $resultItem->getRepairCost()){ //Not enough exp
+ 		if($player->getXpLevel() < $resultItem->getRepairCost()){ //Not enough exp
  			return false;
   		}
- 		$player->setExpLevel($player->getExpLevel() - $resultItem->getRepairCost());*/
-
- 		if(!$player->isCreative()){
- 			return false; //Experience is not implemented yet. Only in creative.
- 		}
+ 		$player->setXpLevel($player->getXpLevel() - $resultItem->getRepairCost());
  		
  		$this->clearAll();
  		if(!$player->getServer()->allowInventoryCheats and !$player->isCreative()){
