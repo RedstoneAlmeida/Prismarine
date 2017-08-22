@@ -49,7 +49,7 @@ class Arrow extends Projectile{
 	public function __construct(Level $level, CompoundTag $nbt, Entity $shootingEntity = null, bool $critical = false, Bow $bow = null){
 		parent::__construct($level, $nbt, $shootingEntity);
 		$this->setCritical($critical);
-		$this->setBow($bow);
+		$this->bow = $bow;
 	}
 
 	public function getBow() : Bow {
