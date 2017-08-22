@@ -101,6 +101,14 @@ class SimpleTransactionQueue implements TransactionQueue{
 
 			$transaction = $this->transactionQueue->dequeue();
 
+			if($transaction->getInventory() instanceof ContainerInventory || $transaction->getInventory() instanceof PlayerInventory){
+				$this->player->getServer()->getPluginManager()->callEvent($event = new InventoryClickEvent($transaction->getInventory(), $this->player, $transaction->getSlot(), $transaction->getInventory()->getItem($transaction->getSlot())));
+
+				if($event->isCancelled()){
+					$ev->setCancelled(true);
+				}
+			}
+
 			if($ev->isCancelled()){
 				$transaction->sendSlotUpdate($this->player); //Send update back to client for cancelled transaction
 				continue;
