@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\entity\Entity;
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
 use pocketmine\level\Level;
@@ -659,6 +660,9 @@ class Block extends Position implements BlockIds, Metadatable{
 						$base /= 12;
 						break;
 				}
+			}
+			if(($enchantment = $item->getEnchantment(Enchantment::EFFICIENCY))){
+				$base /= (1.3 ** (2 ** ($enchantment->getLevel() - 1)));
 			}
 		}else{
 			$base *= 3.33;
