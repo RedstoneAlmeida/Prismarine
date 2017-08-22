@@ -81,6 +81,7 @@ use pocketmine\inventory\Inventory;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\level\ChunkLoader;
 use pocketmine\level\format\Chunk;
