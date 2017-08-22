@@ -29,4 +29,33 @@ abstract class Armor extends Item{
 	public function getMaxStackSize(){
 		return 1;
 	}
+
+	public function setCustomColor(Color $color){
+		if(($hasTag = $this->hasCompoundTag())){
+			$tag = $this->getNamedTag();
+		}else{
+			$tag = new CompoundTag("", []);
+		}
+		$tag->customColor = new IntTag("customColor", $color->getColorCode());
+		$this->setCompoundTag($tag);
+	}
+
+	public function getCustomColor(){
+		if(!$this->hasCompoundTag()) return null;
+		$tag = $this->getNamedTag();
+		if(isset($tag->customColor)){
+			return $tag["customColor"];
+		}
+		return null;
+	}
+
+	public function clearCustomColor(){
+		if(!$this->hasCompoundTag()) return;
+		$tag = $this->getNamedTag();
+		if(isset($tag->customColor)){
+			unset($tag->customColor);
+		}
+		$this->setCompoundTag($tag);
+	}
+	
 }
