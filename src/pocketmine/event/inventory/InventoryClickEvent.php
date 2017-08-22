@@ -41,7 +41,7 @@ class InventoryClickEvent extends InventoryEvent implements Cancellable{
 	 * @param int       $slot
 	 * @param Item      $item
 	 */
-	public function __construct(Inventory $inventory, Player $who, $slot, Item $item){
+	public function __construct(Inventory $inventory, Player $who, int $slot, Item $item){
 		$this->who = $who;
 		$this->slot = $slot;
 		$this->item = $item;
@@ -51,21 +51,28 @@ class InventoryClickEvent extends InventoryEvent implements Cancellable{
 	/**
 	 * @return Player
 	 */
-	public function getWhoClicked(){
+	public function getWhoClicked(): Player{
+		return $this->who;
+	}
+
+	/**
+	 * @return Player
+	 */
+	public function getPlayer(): Player{
 		return $this->who;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getSlot(){
+	public function getSlot(): int{
 		return $this->slot;
 	}
 
 	/**
 	 * @return Item
 	 */
-	public function getItem(){
+	public function getItem(): Item{
 		return $this->item;
 	}
 }
