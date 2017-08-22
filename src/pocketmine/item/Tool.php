@@ -25,6 +25,7 @@ namespace pocketmine\item;
 
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
+use pocketmine\item\enchantment\Enchantment;
 
 abstract class Tool extends Item{
 	const TIER_WOODEN = 1;
@@ -61,7 +62,7 @@ abstract class Tool extends Item{
 		}
 
 		if(($enchantment = $this->getEnchantment(Enchantment::UNBREAKING)) !== null){
-			if(!(mt_rand(0, $enchantment->getLevel()) === 1)){
+			if(mt_rand(0, $enchantment->getLevel()) !== 1){
 				return true;
 			}
 		}

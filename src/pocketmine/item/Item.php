@@ -586,7 +586,6 @@ class Item implements ItemIds, \JsonSerializable{
 	 * @param Enchantment $ench
 	 *
 	 * @return $this
-	 *
 	 */
 	public function addEnchantment(Enchantment $ench){
 		if(!$this->hasCompoundTag()){
