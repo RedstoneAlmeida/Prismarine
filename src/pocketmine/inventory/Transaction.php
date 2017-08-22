@@ -35,7 +35,7 @@ interface Transaction{
 	/**
 	 * @return Inventory
 	 */
-	public function getInventory() : Inventory;
+	public function getInventory();
 
 	/**
 	 * @return int

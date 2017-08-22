@@ -45,12 +45,12 @@ class DropItemTransaction extends BaseTransaction{
 		//Nothing to update
 	}
 
-	public function getInventory(): Inventory{
+	public function getInventory(){
 		return null;
 	}
 
 	public function getSlot(): int{
-		return null;
+		return -1;
 	}
 
 	public function sendSlotUpdate(Player $source){
