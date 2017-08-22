@@ -1386,8 +1386,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
  				}
 
 				$this->server->getPluginManager()->callEvent($ev = new InventoryPickupArrowEvent($this->inventory, $entity));
-				if(!$entity->getBow()->hasEnchantment(Enchantment::INFINITY))
-					$ev->setCancelled(true);
+				if($entity->getBow()->hasEnchantment(Enchantment::INFINITY))
+					$ev->setCancelled(true)''
 				if($ev->isCancelled()){
 					continue;
 				}
