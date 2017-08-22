@@ -81,6 +81,7 @@ use pocketmine\inventory\Inventory;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
+use pocketmine\item\Armor;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\level\ChunkLoader;
@@ -2369,6 +2370,40 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}else{
 					$snowball->spawnToAll();
 				}
+			}
+
+			if($item instanceof Armor){
+				switch($item->getId()){
+					case Item::LEATHER_CAP:
+					case Item::CHAINMAIL_HELMET:
+					case Item::IRON_HELMET:
+					case Item::DIAMOND_HELMET:
+					case Item::GOLDEN_HELMET:
+						$this->inventory->setHelmet($item);
+						break;
+					case Item::LEATHER_TUNIC:
+					case Item::CHAINMAIL_CHESTPLATE:
+					case Item::IRON_CHESTPLATE:
+					case Item::DIAMOND_CHESTPLATE:
+					case Item::GOLDEN_CHESTPLATE:
+						$this->inventory->setChestplate($item);
+						break;
+					case Item::LEATHER_LEGGINGS:
+					case Item::CHAINMAIL_LEGGINGS:
+					case Item::IRON_LEGGINGS:
+					case Item::DIAMOND_LEGGINGS:
+					case Item::GOLDEN_LEGGINGS:
+						$this->inventory->setLeggings($item);
+						break;
+					case Item::LEATHER_BOOTS:
+					case Item::CHAINMAIL_BOOTS:
+					case Item::IRON_BOOTS:
+					case Item::DIAMOND_BOOTS:
+					case Item::GOLDEN_BOOTS:
+						$this->inventory->setBoots($item);
+						break;
+				}
+				$this->inventory->setItemInHand(Item::get(Item::AIR));
 			}
 
 			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, true);
