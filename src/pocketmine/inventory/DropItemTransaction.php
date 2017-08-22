@@ -64,14 +64,10 @@ class DropItemTransaction extends BaseTransaction{
 
 	public function execute(Player $source): bool{
 		$droppedItem = $this->getTargetItem();
-		if(!$source->isCreative()){
-			if($source->getFloatingInventory()->contains($droppedItem)){
-				$source->getFloatingInventory()->removeItem($droppedItem);
-			}elseif($source->getInventory()->contains($droppedItem)){
-				$source->getInventory()->removeItem($droppedItem);
-			}else{
-				return false;
-			}
+		if($source->getFloatingInventory()->contains($droppedItem)){
+			$source->getFloatingInventory()->removeItem($droppedItem);
+		}elseif($source->getInventory()->contains($droppedItem)){
+			$source->getInventory()->removeItem($droppedItem);
 		}
 		$source->dropItem($droppedItem);
 		return true;
