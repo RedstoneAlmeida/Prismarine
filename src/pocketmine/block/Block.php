@@ -661,7 +661,7 @@ class Block extends Position implements BlockIds, Metadatable{
 						break;
 				}
 			}
-			if(($enchantment = $item->getEnchantment(Enchantment::EFFICIENCY))){
+			if(($enchantment = $item->getEnchantment(Enchantment::EFFICIENCY)) !== null){
 				$base /= (1.3 ** (2 ** ($enchantment->getLevel() - 1)));
 			}
 		}else{
