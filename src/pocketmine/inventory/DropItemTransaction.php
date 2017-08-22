@@ -70,6 +70,7 @@ class DropItemTransaction extends BaseTransaction{
 			$source->getInventory()->removeItem($droppedItem);
 		}
 		$source->dropItem($droppedItem);
+		$source->getInventory()->sendContents($source);
 		return true;
 	}
 }
