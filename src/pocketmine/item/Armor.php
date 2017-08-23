@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use pocketmine\utils\Color;
+
 abstract class Armor extends Item{
 
 	public function getMaxStackSize(){
