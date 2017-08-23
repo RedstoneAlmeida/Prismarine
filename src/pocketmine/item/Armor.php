@@ -40,7 +40,7 @@ abstract class Armor extends Item{
 		}else{
 			$tag = new CompoundTag("", []);
 		}
-		$tag->customColor = new IntTag("customColor", $color->getColorCode());
+		$tag->customColor = new IntTag("customColor", $color->toRGB());
 		$this->setCompoundTag($tag);
 	}
 
