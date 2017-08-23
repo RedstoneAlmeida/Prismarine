@@ -2824,6 +2824,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			 */
 			$possibleRecipes = $this->server->getCraftingManager()->getRecipesByResult($packet->output[0]);
 			$recipe = null;
+			$toRemove = [];
 			foreach($possibleRecipes as $r){
 				/* Check the ingredient list and see if it matches the ingredients we've put into the crafting grid
 				 * As soon as we find a recipe that we have all the ingredients for, take it and run with it. */
@@ -2839,6 +2840,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
  						$canCraft = false;
  						return true;
  					}
+ 					$toRemove[] = $ingredient;
  					$floatingInventory->removeItem($ingredient);
 				}
 				if($canCraft){
@@ -2848,12 +2850,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
  				}
  			}
 			if($recipe !== null){
+				$this->floatingInventory = $floatingInventory; //Set player crafting inv to the idea one created in this process
 				$this->server->getPluginManager()->callEvent($ev = new CraftItemEvent($this, $ingredients, $recipe));
 				if($ev->isCancelled()){
+					foreach($toRemove as $item){
+						$this->inventory->addItem($item);
+					}
 					$this->inventory->sendContents($this);
 					return true;
 				}
-				$this->floatingInventory = $floatingInventory; //Set player crafting inv to the idea one created in this process
 				$this->floatingInventory->addItem(clone $recipe->getResult()); //Add the result to our picture of the crafting inventory
 			}else{
 				$this->server->getLogger()->debug("Unmatched desktop crafting recipe " . $recipe->getId() . " from player " . $this->getName());
