@@ -2091,7 +2091,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					}else{
 						$this->inventory->sendContents($this);
 					}
-					$this->level->broadcastLevelSoundEvent($this->add(0, 2, 0), LevelSoundEventPacket::SOUND_BURP);
 				}
 				break;
 			default:

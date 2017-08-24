@@ -27,6 +27,7 @@ use pocketmine\entity\Entity;
 use pocketmine\entity\Human;
 use pocketmine\event\entity\EntityEatItemEvent;
 use pocketmine\network\mcpe\protocol\EntityEventPacket;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
 
 abstract class Food extends Item implements FoodSource{
@@ -60,6 +61,7 @@ abstract class Food extends Item implements FoodSource{
 			$human->dataPacket($pk);
 		}
 		$human->getLevel()->getServer()->broadcastPacket($human->getViewers(), $pk);
+		$human->getLevel()->broadcastLevelSoundEvent($human->add(0, 2, 0), LevelSoundEventPacket::SOUND_BURP);
 
 		$ev = new EntityEatItemEvent($human, $this);
 
