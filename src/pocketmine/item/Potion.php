@@ -129,9 +129,8 @@ class Potion extends Item{
 			$entity->addEffect($effect[0]);
 		}
 
-		if($entity instanceof Human){
+ 		if($entity->isSurvival())
  			$entity->getInventory()->setItemInHand(Item::get(Item::GLASS_BOTTLE, 1));
- 		}
 	}
 
 	public function getEffects(){
@@ -156,7 +155,7 @@ class Potion extends Item{
 				$effect = [[Effect::getEffect(Effect::JUMP)->setAmplifier(0)->setDuration(8 * 60 * 20), 1]];
 				break;
 			case Potion::LEAPING_TWO:
-				$effect = [[Effect::getEffect(Effect::JUMP)->setAmplifier(1)->setDuration(1.5 * 60 * 20), 1]];
+				$effect = [[Effect::getEffect(Effect::JUMP)->setAmplifier(1)->setDuration((int) (1.5 * 60 * 20)), 1]];
 				break;
 			case Potion::FIRE_RESISTANCE:
 				$effect = [[Effect::getEffect(Effect::FIRE_RESISTANCE)->setAmplifier(0)->setDuration(3 * 60 * 20), 1]];
@@ -171,7 +170,7 @@ class Potion extends Item{
 				$effect = [[Effect::getEffect(Effect::SPEED)->setAmplifier(0)->setDuration(8 * 60 * 20), 1]];
 				break;
 			case Potion::SPEED_TWO:
-				$effect = [[Effect::getEffect(Effect::SPEED)->setAmplifier(1)->setDuration(1.5 * 60 * 20), 1]];
+				$effect = [[Effect::getEffect(Effect::SPEED)->setAmplifier(1)->setDuration((int) (1.5 * 60 * 20)), 1]];
 				break;
 			case Potion::SLOWNESS:
 				$effect = [[Effect::getEffect(Effect::SLOWNESS)->setAmplifier(0)->setDuration(1 * 60 * 20), 1]];
@@ -210,10 +209,10 @@ class Potion extends Item{
 				$effect = [[Effect::getEffect(Effect::STRENGTH)->setAmplifier(0)->setDuration(8 * 60 * 20), 1]];
 				break;
 			case Potion::STRENGTH_TWO:
-				$effect = [[Effect::getEffect(Effect::STRENGTH)->setAmplifier(1)->setDuration(1.5 * 60 * 20), 1]];
+				$effect = [[Effect::getEffect(Effect::STRENGTH)->setAmplifier(1)->setDuration((int) (1.5 * 60 * 20)), 1]];
 				break;
 			case Potion::WEAKNESS:
-				$effect = [[Effect::getEffect(Effect::WEAKNESS)->setAmplifier(0)->setDuration(1.5 * 60 * 20), 1]];
+				$effect = [[Effect::getEffect(Effect::WEAKNESS)->setAmplifier(0)->setDuration((int) (1.5 * 60 * 20)), 1]];
 				break;
 			case Potion::WEAKNESS_T:
 				$effect = [[Effect::getEffect(Effect::WEAKNESS)->setAmplifier(0)->setDuration(4 * 60 * 20), 1]];

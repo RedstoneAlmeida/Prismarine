@@ -83,7 +83,9 @@ use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\item\Armor;
 use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\Food;
 use pocketmine\item\Item;
+use pocketmine\item\Potion;
 use pocketmine\level\ChunkLoader;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
@@ -2094,7 +2096,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 				break;
 			case EntityEventPacket::EATING: 
-				$this->level->broadcastLevelSoundEvent($this->add(0, 2, 0), LevelSoundEventPacket::SOUND_EAT);
+				$slot = $this->inventory->getItemInHand();
+				if($slot instanceof Food){
+					$this->level->broadcastLevelSoundEvent($this->add(0, 2, 0), LevelSoundEventPacket::SOUND_EAT);
+				}elseif($slot instanceof Potion){
+					$this->level->broadcastLevelSoundEvent($this->add(0, 2, 0), LevelSoundEventPacket::SOUND_DRINK);
+				}
 				break;
 			default:
 				return false;
