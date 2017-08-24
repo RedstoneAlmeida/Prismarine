@@ -470,6 +470,20 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	/**
+	 * @return int
+	 */
+	public function getNextChunkOrderRun(): int{
+		return $this->nextChunkOrderRun;
+	}
+
+	/**
+	 * @param int
+	 */
+	public function setNextChunkOrderRun(int $nextChunkOrderRun){
+		$this->nextChunkOrderRun = $nextChunkOrderRun;
+	}
+
+	/**
 	 * @param Player $player
 	 */
 	public function hidePlayer(Player $player){
