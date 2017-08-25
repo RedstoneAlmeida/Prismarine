@@ -83,7 +83,10 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\inventory\transaction\SimpleInventoryTransaction;
+use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\Food;
 use pocketmine\item\Item;
+use pocketmine\item\Potion;
 use pocketmine\level\ChunkLoader;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
@@ -224,6 +227,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public $joined = false;
 	public $gamemode;
 	public $lastBreak;
+	public $lastProjectile;
 
 	protected $windowCnt = 2;
 	/** @var \SplObjectStorage<Inventory> */
@@ -659,6 +663,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->namedtag = new CompoundTag();
 		$this->server = Server::getInstance();
 		$this->lastBreak = PHP_INT_MAX;
+		$this->lastProjectile = PHP_INT_MAX;
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->clientID = $clientID;
@@ -1441,6 +1446,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 
 				$this->server->getPluginManager()->callEvent($ev = new InventoryPickupArrowEvent($this->inventory, $entity));
+				if($entity->getBow() !== null and !$entity->getBow()->hasEnchantment(Enchantment::INFINITY))
+					$ev->setCancelled(true);
 				if($ev->isCancelled()){
 					continue;
 				}
@@ -2141,6 +2148,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					}
 				}
 				break;
+			case EntityEventPacket::EATING:
+				$slot = $this->inventory->getItemInHand();
+				if($slot instanceof Food){
+					$this->level->broadcastLevelSoundEvent($this->add(0, 2, 0), LevelSoundEventPacket::SOUND_EAT);
+				}elseif($slot instanceof Potion){
+					$this->level->broadcastLevelSoundEvent($this->add(0, 2, 0), LevelSoundEventPacket::SOUND_DRINK);
+				}
 			default:
 				return false;
 		}
@@ -2323,11 +2337,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							$f = 1.5;
 							$snowball = Entity::createEntity("Snowball", $this->getLevel(), $nbt, $this);
 							$snowball->setMotion($snowball->getMotion()->multiply($f));
+							$this->lastProjectile = time();
 							if($this->isSurvival()){
 								$item->setCount($item->getCount() - 1);
 								$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
 							}
 							if($snowball instanceof Projectile){
+								$snowball->setShootingEntity($this);
 								$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($snowball));
 								if($projectileEv->isCancelled()){
 									$snowball->kill();
@@ -2338,6 +2354,118 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							}else{
 								$snowball->spawnToAll();
 							}
+						}elseif($item->getId() === Item::EGG){
+							$nbt = new CompoundTag("", [
+								new ListTag("Pos", [
+									new DoubleTag("", $this->x),
+									new DoubleTag("", $this->y + $this->getEyeHeight()),
+									new DoubleTag("", $this->z)
+								]),
+								new ListTag("Motion", [
+									new DoubleTag("", $aimPos->x),
+									new DoubleTag("", $aimPos->y),
+									new DoubleTag("", $aimPos->z)
+								]),
+								new ListTag("Rotation", [
+									new FloatTag("", $this->yaw),
+									new FloatTag("", $this->pitch)
+								]),
+							]);
+
+							$f = 1.5;
+							$egg = Entity::createEntity("Egg", $this->getLevel(), $nbt, $this);
+							$egg->setMotion($egg->getMotion()->multiply($f));
+							$this->lastProjectile = time();
+							if($this->isSurvival()){
+								$item->setCount($item->getCount() - 1);
+								$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
+							}
+							if($egg instanceof Projectile){
+								$egg->setShootingEntity($this);
+								$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($egg));
+								if($projectileEv->isCancelled()){
+									$egg->kill();
+								}else{
+									$egg->spawnToAll();
+									$this->level->addSound(new LaunchSound($this), $this->getViewers());
+								}
+							}else{
+								$egg->spawnToAll();
+							}
+						}elseif($item->getId() === Item::ENDER_PEARL){
+							if($this->lastProjectile === PHP_INT_MAX or time() - $this->lastProjectile >= 1){
+								$nbt = new CompoundTag("", [
+									new ListTag("Pos", [
+										new DoubleTag("", $this->x),
+										new DoubleTag("", $this->y + $this->getEyeHeight()),
+										new DoubleTag("", $this->z)
+									]),
+									new ListTag("Motion", [
+										new DoubleTag("", $aimPos->x),
+										new DoubleTag("", $aimPos->y),
+										new DoubleTag("", $aimPos->z)
+									]),
+									new ListTag("Rotation", [
+										new FloatTag("", $this->yaw),
+										new FloatTag("", $this->pitch)
+									]),
+								]);
+
+								$f = 1.5;
+								$pearl = Entity::createEntity("EnderPearl", $this->getLevel(), $nbt, $this);
+								$pearl->setMotion($pearl->getMotion()->multiply($f));
+								$this->lastProjectile = time();
+								if($this->isSurvival()){
+									$item->setCount($item->getCount() - 1);
+									$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
+								}
+								if($pearl instanceof Projectile){
+									$pearl->setShootingEntity($this);
+									$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($pearl));
+									if($projectileEv->isCancelled()){
+										$pearl->kill();
+									}else{
+										$pearl->spawnToAll();
+										$this->level->addSound(new LaunchSound($this), $this->getViewers());
+									}
+								}else{
+									$pearl->spawnToAll();
+								}
+							}
+						}
+
+						if($item instanceof Armor){
+							switch($item->getId()){
+								case Item::LEATHER_CAP:
+								case Item::CHAINMAIL_HELMET:
+								case Item::IRON_HELMET:
+								case Item::DIAMOND_HELMET:
+								case Item::GOLDEN_HELMET:
+									$this->inventory->setHelmet($item);
+									break;
+								case Item::LEATHER_TUNIC:
+								case Item::CHAINMAIL_CHESTPLATE:
+								case Item::IRON_CHESTPLATE:
+								case Item::DIAMOND_CHESTPLATE:
+								case Item::GOLDEN_CHESTPLATE:
+									$this->inventory->setChestplate($item);
+									break;
+								case Item::LEATHER_LEGGINGS:
+								case Item::CHAINMAIL_LEGGINGS:
+								case Item::IRON_LEGGINGS:
+								case Item::DIAMOND_LEGGINGS:
+								case Item::GOLDEN_LEGGINGS:
+									$this->inventory->setLeggings($item);
+									break;
+								case Item::LEATHER_BOOTS:
+								case Item::CHAINMAIL_BOOTS:
+								case Item::IRON_BOOTS:
+								case Item::DIAMOND_BOOTS:
+								case Item::GOLDEN_BOOTS:
+									$this->inventory->setBoots($item);
+									break;
+							}
+							$this->inventory->setItemInHand(Item::get(Item::AIR));
 						}
 
 						$this->setGenericFlag(self::DATA_FLAG_ACTION, true);
@@ -2526,12 +2654,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 									$ev->getProjectile()->setBow(clone $bow);
 									$ev->getProjectile()->setMotion($ev->getProjectile()->getMotion()->multiply($ev->getForce()));
 									if($this->isSurvival()){
-										$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
-										$bow->setDamage($bow->getDamage() + 1);
-										if($bow->getDamage() >= 385){
-											$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
+										if(!$bow->hasEnchantment(Enchantment::INFINITY)) 
+											$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
+										if(($enchantment = $bow->getEnchantment(Enchantment::UNBREAKING)) !== null){
+											if(mt_rand(0, $enchantment->getLevel()) !== 1){
+												$bow->setDamage($bow->getDamage() + 1);
+												if($bow->getDamage() >= 385){
+													$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
+												}else{
+													$this->inventory->setItemInHand($bow);
+												}
+											}
 										}else{
-											$this->inventory->setItemInHand($bow);
+											$bow->setDamage($bow->getDamage() + 1);
+											if($bow->getDamage() >= 385){
+												$this->inventory->setItemInHand(Item::get(Item::AIR, 0, 0));
+											}else{
+												$this->inventory->setItemInHand($bow);
+											}
 										}
 									}
 									if($ev->getProjectile() instanceof Projectile){

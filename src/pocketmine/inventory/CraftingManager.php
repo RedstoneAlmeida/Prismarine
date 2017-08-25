@@ -25,6 +25,7 @@ namespace pocketmine\inventory;
 
 use pocketmine\event\Timings;
 use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\Server;
 use pocketmine\utils\Config;
@@ -69,10 +70,11 @@ class CraftingManager{
 					$first = $recipe["output"][0];
 					$result = new ShapedRecipe(Item::jsonDeserialize($first), $recipe["height"], $recipe["width"]);
 
-					$shape = array_chunk($recipe["input"], $recipe["width"]);
+					$shape = array_map(function(string $keys) : array{ return str_split($keys); }, $recipe["shape"]);
+					$ingredients = array_map(function(array $data) : Item{ return Item::jsonDeserialize($data); }, $recipe["input"]);
 					foreach($shape as $y => $row){
 						foreach($row as $x => $ingredient){
-							$result->addIngredient($x, $y, Item::jsonDeserialize($ingredient));
+							$result->addIngredient($x, $y, $ingredients[$ingredient] ?? Item::get(Item::AIR, 0, 0));
 						}
 					}
 					$this->registerRecipe($result);
@@ -81,7 +83,7 @@ class CraftingManager{
 				case 3:
 					$result = $recipe["output"];
 					$resultItem = Item::jsonDeserialize($result);
-					$this->registerRecipe(new FurnaceRecipe($resultItem, Item::get($recipe["inputId"], $recipe["inputDamage"] ?? -1, 1)));
+					$this->registerRecipe(new FurnaceRecipe($resultItem, ItemFactory::get($recipe["inputId"], $recipe["inputDamage"] ?? -1, 1)));
 					break;
 				default:
 					break;

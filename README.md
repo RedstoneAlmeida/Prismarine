@@ -12,6 +12,7 @@ Some of the extended functionality that Prismarine offers:
 
 * Xbox Live authentication checking
 * Working crafting
+* Working enchantments - W.I.P - 8/26 of enchantments working
 
 However, Prismarine still has a long way to go. We welcome contributions.
 

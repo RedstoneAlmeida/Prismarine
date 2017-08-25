@@ -24,10 +24,12 @@ declare(strict_types=1);
 namespace pocketmine\entity;
 
 use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item as ItemItem;
 use pocketmine\level\Level;
 use pocketmine\nbt\NBT;
@@ -275,6 +277,30 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			return $level ** 2 * 2.5 - 40.5 * $level + 360;
 		}
 		return $level ** 2 * 4.5 - 162.5 * $level + 2220;
+	}
+
+	public function attack($damage, EntityDamageEvent $source){
+		$cause = $source->getCause();
+		if($cause !== EntityDamageEvent::CAUSE_VOID && $cause !== EntityDamageEvent::CAUSE_CUSTOM && $cause !== EntityDamageEvent::CAUSE_FALL && $cause !== EntityDamageEvent::CAUSE_MAGIC){
+			$modifier = 0;
+			if(($enchantment = $this->inventory->getHelmet()->getEnchantment(Enchantment::PROTECTION)) !== null){
+				$modifier += floor((6 + $enchantment->getLevel() ** 2) / 2);
+			}
+			if(($enchantment = $this->inventory->getChestplate()->getEnchantment(Enchantment::PROTECTION)) !== null){
+				$modifier += floor((6 + $enchantment->getLevel() ** 2) / 2);
+			}
+			if(($enchantment = $this->inventory->getLeggings()->getEnchantment(Enchantment::PROTECTION)) !== null){
+				$modifier += floor((6 + $enchantment->getLevel() ** 2) / 2);
+			}
+			if(($enchantment = $this->inventory->getBoots()->getEnchantment(Enchantment::PROTECTION)) !== null){
+				$modifier += floor((6 + $enchantment->getLevel() ** 2) / 2);
+			}
+			$modifier *= 4;
+			$damage = $source->getFinalDamage();
+			$damage = $damage / 100 * $modifier * -1;
+			$source->setDamage($damage, EntityDamageEvent::MODIFIER_ENCHANTMENT_PROTECTION);
+		}
+		parent::attack($damage, $source);
 	}
 
 	public function getInventory(){

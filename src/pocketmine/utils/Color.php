@@ -123,6 +123,14 @@ class Color{
 	}
 
 	/**
+	 * Returns an RGB 24-bit colour value.
+	 * @return int
+	 */
+	public function toRGB() : int{
+		return ($this->r << 16) | ($this->g << 8) | $this->b;
+	}
+
+	/**
 	 * Returns an ARGB 32-bit colour value.
 	 * @return int
 	 */
