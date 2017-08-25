@@ -25,6 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
@@ -38,15 +39,15 @@ class Skull extends Flowable{
 
 	protected $id = self::SKULL_BLOCK;
 
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getHardness(){
+	public function getHardness() : float{
 		return 1;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Mob Head Block";
 	}
 
@@ -62,10 +63,10 @@ class Skull extends Flowable{
 		);
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		if($face !== 0){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
+		if($face !== Vector3::SIDE_DOWN){
 			$this->meta = $face;
-			if($face === 1){
+			if($face === Vector3::SIDE_UP){
 				$rot = floor(($player->yaw * 16 / 360) + 0.5) & 0x0F;
 			}else{
 				$rot = $face;
@@ -89,11 +90,11 @@ class Skull extends Flowable{
 		return false;
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) : array{
 		$tile = $this->level->getTile($this);
 		if($tile instanceof SkullTile){
 			return [
-				[Item::SKULL, $tile->getType(), 1]
+				Item::get(Item::SKULL, $tile->getType(), 1)
 			];
 		}
 

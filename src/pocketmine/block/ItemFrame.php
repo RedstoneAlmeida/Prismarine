@@ -25,6 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\level\Level;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\{
 	ByteTag, CompoundTag, FloatTag, IntTag, StringTag
 };
@@ -35,15 +36,17 @@ use pocketmine\tile\Tile;
 class ItemFrame extends Flowable{
 	protected $id = Block::ITEM_FRAME_BLOCK;
 
-	public function __construct($meta = 0){
+	protected $itemId = Item::ITEM_FRAME;
+
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Item Frame";
 	}
 
-	public function onActivate(Item $item, Player $player = null){
+	public function onActivate(Item $item, Player $player = null) : bool{
 		$tile = $this->level->getTile($this);
 		if(!($tile instanceof TileItemFrame)){
 			$nbt = new CompoundTag("", [
@@ -74,7 +77,7 @@ class ItemFrame extends Flowable{
 		return true;
 	}
 
-	public function onBreak(Item $item){
+	public function onBreak(Item $item) : bool{
 		$tile = $this->level->getTile($this);
 		if($tile instanceof TileItemFrame){
 			//TODO: add events
@@ -85,7 +88,7 @@ class ItemFrame extends Flowable{
 		return parent::onBreak($item);
 	}
 
-	public function onUpdate($type){
+	public function onUpdate(int $type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			$sides = [
 				0 => 4,
@@ -101,16 +104,16 @@ class ItemFrame extends Flowable{
 		return false;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		if($face === 0 or $face === 1){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
+		if($face === Vector3::SIDE_DOWN or $face === Vector3::SIDE_UP){
 			return false;
 		}
 
 		$faces = [
-			2 => 3,
-			3 => 2,
-			4 => 1,
-			5 => 0
+			Vector3::SIDE_NORTH => 3,
+			Vector3::SIDE_SOUTH => 2,
+			Vector3::SIDE_WEST => 1,
+			Vector3::SIDE_EAST => 0
 		];
 
 		$this->meta = $faces[$face];
@@ -137,10 +140,7 @@ class ItemFrame extends Flowable{
 
 	}
 
-	public function getDrops(Item $item){
-		return [
-			[Item::ITEM_FRAME, 0, 1]
-		];
+	public function getVariantBitmask() : int{
+		return 0;
 	}
-
 }

@@ -35,7 +35,7 @@ class Zombie extends Monster{
 	public $length = 0.6;
 	public $height = 1.8;
 
-	public function getName(){
+	public function getName() : string{
 		return "Zombie";
 	}
 
@@ -43,12 +43,8 @@ class Zombie extends Monster{
 		$pk = new AddEntityPacket();
 		$pk->entityRuntimeId = $this->getId();
 		$pk->type = Zombie::NETWORK_ID;
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
+		$pk->position = $this->asVector3();
+		$pk->motion = $this->getMotion();
 		$pk->yaw = $this->yaw;
 		$pk->pitch = $this->pitch;
 		$pk->metadata = $this->dataProperties;

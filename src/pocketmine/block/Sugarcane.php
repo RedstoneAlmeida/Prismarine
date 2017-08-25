@@ -34,28 +34,23 @@ class Sugarcane extends Flowable{
 
 	protected $id = self::SUGARCANE_BLOCK;
 
-	public function __construct($meta = 0){
+	protected $itemId = Item::SUGARCANE;
+
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Sugarcane";
 	}
 
-
-	public function getDrops(Item $item){
-		return [
-			[Item::SUGARCANE, 0, 1],
-		];
-	}
-
-	public function onActivate(Item $item, Player $player = null){
+	public function onActivate(Item $item, Player $player = null) : bool{
 		if($item->getId() === Item::DYE and $item->getDamage() === 0x0F){ //Bonemeal
 			if($this->getSide(Vector3::SIDE_DOWN)->getId() !== self::SUGARCANE_BLOCK){
 				for($y = 1; $y < 3; ++$y){
 					$b = $this->getLevel()->getBlock(new Vector3($this->x, $this->y + $y, $this->z));
 					if($b->getId() === self::AIR){
-						Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($b, new Sugarcane()));
+						Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($b, BlockFactory::get(Block::SUGARCANE_BLOCK)));
 						if(!$ev->isCancelled()){
 							$this->getLevel()->setBlock($b, $ev->getNewState(), true);
 						}
@@ -75,7 +70,7 @@ class Sugarcane extends Flowable{
 		return false;
 	}
 
-	public function onUpdate($type){
+	public function onUpdate(int $type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			$down = $this->getSide(Vector3::SIDE_DOWN);
 			if($down->isTransparent() === true and $down->getId() !== self::SUGARCANE_BLOCK){
@@ -89,7 +84,7 @@ class Sugarcane extends Flowable{
 					for($y = 1; $y < 3; ++$y){
 						$b = $this->getLevel()->getBlock(new Vector3($this->x, $this->y + $y, $this->z));
 						if($b->getId() === self::AIR){
-							$this->getLevel()->setBlock($b, new Sugarcane(), true);
+							$this->getLevel()->setBlock($b, BlockFactory::get(Block::SUGARCANE_BLOCK), true);
 							break;
 						}
 					}
@@ -107,10 +102,10 @@ class Sugarcane extends Flowable{
 		return false;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
 		$down = $this->getSide(Vector3::SIDE_DOWN);
 		if($down->getId() === self::SUGARCANE_BLOCK){
-			$this->getLevel()->setBlock($block, new Sugarcane(), true);
+			$this->getLevel()->setBlock($block, BlockFactory::get(Block::SUGARCANE_BLOCK), true);
 
 			return true;
 		}elseif($down->getId() === self::GRASS or $down->getId() === self::DIRT or $down->getId() === self::SAND){
@@ -119,12 +114,16 @@ class Sugarcane extends Flowable{
 			$block2 = $down->getSide(Vector3::SIDE_WEST);
 			$block3 = $down->getSide(Vector3::SIDE_EAST);
 			if(($block0 instanceof Water) or ($block1 instanceof Water) or ($block2 instanceof Water) or ($block3 instanceof Water)){
-				$this->getLevel()->setBlock($block, new Sugarcane(), true);
+				$this->getLevel()->setBlock($block, BlockFactory::get(Block::SUGARCANE_BLOCK), true);
 
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	public function getVariantBitmask() : int{
+		return 0;
 	}
 }

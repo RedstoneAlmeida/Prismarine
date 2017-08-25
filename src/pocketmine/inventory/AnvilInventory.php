@@ -24,65 +24,37 @@ declare(strict_types=1);
 namespace pocketmine\inventory;
 
 use pocketmine\level\Position;
-use pocketmine\level\sound\AnvilUseSound;
+use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\Player;
 
-class AnvilInventory extends TemporaryInventory{
- 
- 	const TARGET = 0;
- 	const SACRIFICE = 1;
- 	const RESULT = 2;
- 
- 
+class AnvilInventory extends ContainerInventory{
+
+	/** @var FakeBlockMenu */
+	protected $holder;
+
 	public function __construct(Position $pos){
-		parent::__construct(new FakeBlockMenu($this, $pos), InventoryType::get(InventoryType::ANVIL));
+		parent::__construct(new FakeBlockMenu($this, $pos));
+	}
+
+	public function getNetworkType() : int{
+		return WindowTypes::ANVIL;
+	}
+
+	public function getName() : string{
+		return "Anvil";
+	}
+
+	public function getDefaultSize() : int{
+		return 3; //1 input, 1 material, 1 result
 	}
 
 	/**
+	 * This override is here for documentation and code completion purposes only.
 	 * @return FakeBlockMenu
 	 */
 	public function getHolder(){
 		return $this->holder;
 	}
-
-	public function getResultSlotIndex(){
- 		return self::RESULT;
- 	}
- 
- 	public function onRename(Player $player, Item $resultItem) : bool{
- 		if(!$resultItem->deepEquals($this->getItem(self::TARGET), true, false, true)){
- 			//Item does not match target item. Everything must match except the tags.
- 			return false;
- 		}
- 
- 		if($player->getXpLevel() < $resultItem->getRepairCost()){ //Not enough exp
- 			return false;
-  		}
- 		$player->setXpLevel($player->getXpLevel() - $resultItem->getRepairCost());
- 		
- 		$this->clearAll();
- 		if(!$player->getServer()->allowInventoryCheats and !$player->isCreative()){
- 			if(!$player->getFloatingInventory()->canAddItem($resultItem)){
- 				return false;
- 			}
- 			$player->getFloatingInventory()->addItem($resultItem);
- 		}
-
- 		$player->getLevel()->addSound(new AnvilUseSound($player), [$player]);
-
- 		return true;
- 	}
- 
- 	public function processSlotChange(Transaction $transaction): bool{
- 		if($transaction->getSlot() === $this->getResultSlotIndex()){
- 			return false;
- 		}
- 		return true;
- 	}
- 
- 	public function onSlotChange($index, $before, $send){
- 		//Do not send anvil slot updates to anyone. This will cause a client crash.
-  	}
 
 	public function onClose(Player $who){
 		parent::onClose($who);

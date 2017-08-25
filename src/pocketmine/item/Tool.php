@@ -25,7 +25,6 @@ namespace pocketmine\item;
 
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
-use pocketmine\item\enchantment\Enchantment;
 
 abstract class Tool extends Item{
 	const TIER_WOODEN = 1;
@@ -59,12 +58,6 @@ abstract class Tool extends Item{
 	public function useOn($object){
 		if($this->isUnbreakable()){
 			return true;
-		}
-
-		if(($enchantment = $this->getEnchantment(Enchantment::UNBREAKING)) !== null){
-			if(mt_rand(0, $enchantment->getLevel()) !== 1){
-				return true;
-			}
 		}
 
 		if($object instanceof Block){
@@ -128,20 +121,6 @@ abstract class Tool extends Item{
 	public function isUnbreakable(){
 		$tag = $this->getNamedTagEntry("Unbreakable");
 		return $tag !== null and $tag->getValue() > 0;
-	}
-
-	/**
-	 * @param bool $unbreakable
-	 *
-	 * @return $this
-	 */
-	public function setUnbreakable(bool $unbreakable){
-		$tag = $this->getNamedTag() ?? new CompoundTag("", []);
-		$tag->Unbreakable = new IntTag("Unbreakable", $unbreakable);
-
-		$this->setNamedTag($tag);
-
-		return $this;
 	}
 
 	public function isPickaxe(){

@@ -31,19 +31,19 @@ class Farmland extends Transparent{
 
 	protected $id = self::FARMLAND;
 
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Farmland";
 	}
 
-	public function getHardness(){
+	public function getHardness() : float{
 		return 0.6;
 	}
 
-	public function getToolType(){
+	public function getToolType() : int{
 		return Tool::TYPE_SHOVEL;
 	}
 
@@ -58,9 +58,9 @@ class Farmland extends Transparent{
 		);
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) : array{
 		return [
-			[Item::DIRT, 0, 1],
+			Item::get(Item::DIRT, 0, 1)
 		];
 	}
 }

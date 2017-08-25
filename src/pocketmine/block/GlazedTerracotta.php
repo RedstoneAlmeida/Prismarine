@@ -26,19 +26,20 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\math\Vector3;
 use pocketmine\Player;
 
 class GlazedTerracotta extends Solid{
 
-	public function getHardness(){
+	public function getHardness() : float{
 		return 1.4;
 	}
 
-	public function getToolType(){
+	public function getToolType() : int{
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
 		if($player !== null){
 			$faces = [
 				0 => 4,
@@ -52,13 +53,15 @@ class GlazedTerracotta extends Solid{
 		return $this->getLevel()->setBlock($block, $this, true, true);
 	}
 
-	public function getDrops(Item $item){
+	public function getVariantBitmask() : int{
+		return 0;
+	}
+
+	public function getDrops(Item $item) : array{
 		if($item->isPickaxe() >= Tool::TIER_WOODEN){
-			return [
-				[$this->getId(), 0, 1],
-			];
-		}else{
-			return [];
+			return parent::getDrops($item);
 		}
+
+		return [];
 	}
 }

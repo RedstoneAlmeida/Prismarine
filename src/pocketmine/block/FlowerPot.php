@@ -41,12 +41,13 @@ class FlowerPot extends Flowable{
 	const STATE_FULL = 1;
 
 	protected $id = self::FLOWER_POT_BLOCK;
+	protected $itemId = Item::FLOWER_POT;
 
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Flower Pot Block";
 	}
 
@@ -61,7 +62,7 @@ class FlowerPot extends Flowable{
 		);
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
 		if($this->getSide(Vector3::SIDE_DOWN)->isTransparent()){
 			return false;
 		}
@@ -87,7 +88,7 @@ class FlowerPot extends Flowable{
 		return true;
 	}
 
-	public function onUpdate($type){
+	public function onUpdate(int $type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if($this->getSide(Vector3::SIDE_DOWN)->isTransparent() === true){
 				$this->getLevel()->useBreakOn($this);
@@ -99,7 +100,7 @@ class FlowerPot extends Flowable{
 		return false;
 	}
 
-	public function onActivate(Item $item, Player $player = null){
+	public function onActivate(Item $item, Player $player = null) : bool{
 		$pot = $this->getLevel()->getTile($this);
 		if(!($pot instanceof TileFlowerPot)){
 			return false;
@@ -121,14 +122,17 @@ class FlowerPot extends Flowable{
 		return true;
 	}
 
-	public function getDrops(Item $item){
-		$items = [[Item::FLOWER_POT, 0, 1]];
+	public function getDrops(Item $item) : array{
+		$items = parent::getDrops($item);
+
 		$tile = $this->getLevel()->getTile($this);
 		if($tile instanceof TileFlowerPot){
-			if(($item = $tile->getItem())->getId() !== Item::AIR){
-				$items[] = [$item->getId(), $item->getDamage(), 1];
+			$item = $tile->getItem();
+			if($item->getId() !== Item::AIR){
+				$items[] = $item;
 			}
 		}
+
 		return $items;
 	}
 

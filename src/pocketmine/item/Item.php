@@ -27,10 +27,11 @@ declare(strict_types=1);
 namespace pocketmine\item;
 
 use pocketmine\block\Block;
+use pocketmine\block\BlockFactory;
 use pocketmine\entity\Entity;
-use pocketmine\inventory\Fuel;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\level\Level;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -328,7 +329,7 @@ class Item implements ItemIds, \JsonSerializable{
 	public static function get(int $id, int $meta = 0, int $count = 1, $tags = "") : Item{
 		try{
 			if($id < 256){
-				return (new ItemBlock(Block::get($id, $meta), $meta, $count))->setCompoundTag($tags);
+				return (new ItemBlock(BlockFactory::get($id, $meta), $meta, $count))->setCompoundTag($tags);
 			}else{
 				$class = self::$list[$id];
 				if($class === null){
@@ -388,8 +389,8 @@ class Item implements ItemIds, \JsonSerializable{
 		$this->meta = $meta !== -1 ? $meta & 0xffff : -1;
 		$this->count = $count;
 		$this->name = $name;
-		if(!isset($this->block) and $this->id <= 0xff and isset(Block::$list[$this->id])){
-			$this->block = Block::get($this->id, $this->meta);
+		if(!isset($this->block) and $this->id <= 0xff and isset(BlockFactory::$list[$this->id])){
+			$this->block = BlockFactory::get($this->id, $this->meta);
 			$this->name = $this->block->getName();
 		}
 	}
@@ -437,11 +438,8 @@ class Item implements ItemIds, \JsonSerializable{
 		}
 
 		$tag = $this->getNamedTag();
-		if(isset($tag->BlockEntityTag) and $tag->BlockEntityTag instanceof CompoundTag){
-			return true;
-		}
 
-		return false;
+		return isset($tag->BlockEntityTag) and $tag->BlockEntityTag instanceof CompoundTag;
 	}
 
 	public function clearCustomBlockData(){
@@ -584,8 +582,6 @@ class Item implements ItemIds, \JsonSerializable{
 
 	/**
 	 * @param Enchantment $ench
-	 *
-	 * @return $this
 	 */
 	public function addEnchantment(Enchantment $ench){
 		if(!$this->hasCompoundTag()){
@@ -620,8 +616,6 @@ class Item implements ItemIds, \JsonSerializable{
 		}
 
 		$this->setNamedTag($tag);
-
-		return $this;
 	}
 
 	/**
@@ -641,73 +635,6 @@ class Item implements ItemIds, \JsonSerializable{
 		}
 
 		return $enchantments;
-	}
-
-	public function hasRepairCost() : bool{
-		if(!$this->hasCompoundTag()){
-			return false;
-		}
-
-		$tag = $this->getNamedTag();
-		if(isset($tag->RepairCost)){
-			$tag = $tag->RepairCost;
-			if($tag instanceof IntTag){
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	public function getRepairCost() : int{
-		if(!$this->hasCompoundTag()){
-			return 1;
-		}
-
-		$tag = $this->getNamedTag();
-		if(isset($tag->display)){
-			$tag = $tag->RepairCost;
-			if($tag instanceof IntTag){
-				return $tag->getValue();
-			}
-		}
-
-		return 1;
-	}
-
-
-	public function setRepairCost(int $cost){
-		if($cost === 1){
-			$this->clearRepairCost();
-		}
-
-		if(!($hadCompoundTag = $this->hasCompoundTag())){
-			$tag = new CompoundTag("", []);
-		}else{
-			$tag = $this->getNamedTag();
-		}
-
-		$tag->RepairCost = new IntTag("RepairCost", $cost);
-
-		if(!$hadCompoundTag){
-			$this->setCompoundTag($tag);
-		}
-
-		return $this;
-	}
-
-	public function clearRepairCost(){
-		if(!$this->hasCompoundTag()){
-			return $this;
-		}
-		$tag = $this->getNamedTag();
-
-		if(isset($tag->RepairCost) and $tag->RepairCost instanceof IntTag){
-			unset($tag->RepairCost);
-			$this->setNamedTag($tag);
-		}
-
-		return $this;
 	}
 
 	/**
@@ -899,6 +826,10 @@ class Item implements ItemIds, \JsonSerializable{
 		$this->count = $count;
 	}
 
+	public function isNull() : bool{
+		return $this->count <= 0 or $this->id === Item::AIR;
+	}
+
 	/**
 	 * Returns the name of the item, or the custom name if it is set.
 	 * @return string
@@ -948,7 +879,7 @@ class Item implements ItemIds, \JsonSerializable{
 		if($this->block instanceof Block){
 			return clone $this->block;
 		}else{
-			return Block::get(self::AIR);
+			return BlockFactory::get(self::AIR);
 		}
 	}
 
@@ -991,15 +922,12 @@ class Item implements ItemIds, \JsonSerializable{
 		return 64;
 	}
 
-	final public function getFuelTime(){
-		if(!isset(Fuel::$duration[$this->id])){
-			return null;
-		}
-		if($this->id !== self::BUCKET or $this->meta === 10){
-			return Fuel::$duration[$this->id];
-		}
-
-		return null;
+	/**
+	 * Returns the time in ticks which the item will fuel a furnace for.
+	 * @return int
+	 */
+	public function getFuelTime() : int{
+		return 0;
 	}
 
 	/**
@@ -1056,18 +984,16 @@ class Item implements ItemIds, \JsonSerializable{
 	/**
 	 * Called when a player uses this item on a block.
 	 *
-	 * @param Level $level
-	 * @param Player $player
-	 * @param Block $block
-	 * @param Block $target
-	 * @param int $face
-	 * @param float $fx
-	 * @param float $fy
-	 * @param float $fz
+	 * @param Level   $level
+	 * @param Player  $player
+	 * @param Block   $block
+	 * @param Block   $target
+	 * @param int     $face
+	 * @param Vector3 $facePos
 	 *
 	 * @return bool
 	 */
-	public function onActivate(Level $level, Player $player, Block $block, Block $target, $face, $fx, $fy, $fz){
+	public function onActivate(Level $level, Player $player, Block $block, Block $target, int $face, Vector3 $facePos) : bool{
 		return false;
 	}
 

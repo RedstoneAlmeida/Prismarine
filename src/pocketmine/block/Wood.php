@@ -25,6 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\Tool;
+use pocketmine\math\Vector3;
 use pocketmine\Player;
 
 class Wood extends Solid{
@@ -35,15 +36,15 @@ class Wood extends Solid{
 
 	protected $id = self::WOOD;
 
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getHardness(){
+	public function getHardness() : float{
 		return 2;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		static $names = [
 			self::OAK => "Oak Wood",
 			self::SPRUCE => "Spruce Wood",
@@ -53,14 +54,14 @@ class Wood extends Solid{
 		return $names[$this->meta & 0x03];
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
 		$faces = [
-			0 => 0,
-			1 => 0,
-			2 => 0b1000,
-			3 => 0b1000,
-			4 => 0b0100,
-			5 => 0b0100,
+			Vector3::SIDE_DOWN => 0,
+			Vector3::SIDE_UP => 0,
+			Vector3::SIDE_NORTH => 0b1000,
+			Vector3::SIDE_SOUTH => 0b1000,
+			Vector3::SIDE_WEST => 0b0100,
+			Vector3::SIDE_EAST => 0b0100,
 		];
 
 		$this->meta = ($this->meta & 0x03) | $faces[$face];
@@ -69,13 +70,15 @@ class Wood extends Solid{
 		return true;
 	}
 
-	public function getDrops(Item $item){
-		return [
-			[$this->id, $this->meta & 0x03, 1],
-		];
+	public function getVariantBitmask() : int{
+		return 0x03;
 	}
 
-	public function getToolType(){
+	public function getToolType() : int{
 		return Tool::TYPE_AXE;
+	}
+
+	public function getFuelTime() : int{
+		return 300;
 	}
 }

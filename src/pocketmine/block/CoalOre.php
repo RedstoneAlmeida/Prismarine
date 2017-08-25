@@ -30,30 +30,30 @@ class CoalOre extends Solid{
 
 	protected $id = self::COAL_ORE;
 
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getHardness(){
+	public function getHardness() : float{
 		return 3;
 	}
 
-	public function getToolType(){
+	public function getToolType() : int{
 		return Tool::TYPE_PICKAXE;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Coal Ore";
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) : array{
 		if($item->isPickaxe() >= Tool::TIER_WOODEN){
 			return [
-				[Item::COAL, 0, 1],
+				Item::get(Item::COAL, 0, 1)
 			];
-		}else{
-			return [];
 		}
+
+		return [];
 	}
 
 }

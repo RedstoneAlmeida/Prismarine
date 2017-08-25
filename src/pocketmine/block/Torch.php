@@ -32,20 +32,20 @@ class Torch extends Flowable{
 
 	protected $id = self::TORCH;
 
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getLightLevel(){
+	public function getLightLevel() : int{
 		return 14;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Torch";
 	}
 
 
-	public function onUpdate($type){
+	public function onUpdate(int $type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			$below = $this->getSide(Vector3::SIDE_DOWN);
 			$side = $this->getDamage();
@@ -68,16 +68,16 @@ class Torch extends Flowable{
 		return false;
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
 		$below = $this->getSide(Vector3::SIDE_DOWN);
 
-		if($target->isTransparent() === false and $face !== 0){
+		if($target->isTransparent() === false and $face !== Vector3::SIDE_DOWN){
 			$faces = [
-				1 => 5,
-				2 => 4,
-				3 => 3,
-				4 => 2,
-				5 => 1,
+				Vector3::SIDE_UP => 5,
+				Vector3::SIDE_NORTH => 4,
+				Vector3::SIDE_SOUTH => 3,
+				Vector3::SIDE_WEST => 2,
+				Vector3::SIDE_EAST => 1,
 			];
 			$this->meta = $faces[$face];
 			$this->getLevel()->setBlock($block, $this, true, true);
@@ -93,9 +93,7 @@ class Torch extends Flowable{
 		return false;
 	}
 
-	public function getDrops(Item $item){
-		return [
-			[$this->id, 0, 1],
-		];
+	public function getVariantBitmask() : int{
+		return 0;
 	}
 }

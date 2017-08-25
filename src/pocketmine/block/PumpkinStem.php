@@ -33,15 +33,15 @@ class PumpkinStem extends Crops{
 
 	protected $id = self::PUMPKIN_STEM;
 
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Pumpkin Stem";
 	}
 
-	public function onUpdate($type){
+	public function onUpdate(int $type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			if($this->getSide(Vector3::SIDE_DOWN)->getId() !== Block::FARMLAND){
 				$this->getLevel()->useBreakOn($this);
@@ -68,7 +68,7 @@ class PumpkinStem extends Crops{
 					$side = $this->getSide(mt_rand(2, 5));
 					$d = $side->getSide(Vector3::SIDE_DOWN);
 					if($side->getId() === self::AIR and ($d->getId() === self::FARMLAND or $d->getId() === self::GRASS or $d->getId() === self::DIRT)){
-						Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($side, new Pumpkin()));
+						Server::getInstance()->getPluginManager()->callEvent($ev = new BlockGrowEvent($side, BlockFactory::get(Block::PUMPKIN)));
 						if(!$ev->isCancelled()){
 							$this->getLevel()->setBlock($side, $ev->getNewState(), true);
 						}
@@ -82,9 +82,9 @@ class PumpkinStem extends Crops{
 		return false;
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) : array{
 		return [
-			[Item::PUMPKIN_SEEDS, 0, mt_rand(0, 2)],
+			Item::get(Item::PUMPKIN_SEEDS, 0, mt_rand(0, 2))
 		];
 	}
 }

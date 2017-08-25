@@ -33,15 +33,15 @@ class DoublePlant extends Flowable{
 
 	protected $id = self::DOUBLE_PLANT;
 
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function canBeReplaced(){
+	public function canBeReplaced(Block $with = null) : bool{
 		return $this->meta === 2 or $this->meta === 3; //grass or fern
 	}
 
-	public function getName(){
+	public function getName() : string{
 		static $names = [
 			0 => "Sunflower",
 			1 => "Lilac",
@@ -53,11 +53,11 @@ class DoublePlant extends Flowable{
 		return $names[$this->meta & 0x07] ?? "";
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
 		$id = $block->getSide(Vector3::SIDE_DOWN)->getId();
 		if(($id === Block::GRASS or $id === Block::DIRT) and $block->getSide(Vector3::SIDE_UP)->canBeReplaced()){
 			$this->getLevel()->setBlock($block, $this, false, false);
-			$this->getLevel()->setBlock($block->getSide(Vector3::SIDE_UP), Block::get($this->id, $this->meta | self::BITFLAG_TOP), false, false);
+			$this->getLevel()->setBlock($block->getSide(Vector3::SIDE_UP), BlockFactory::get($this->id, $this->meta | self::BITFLAG_TOP), false, false);
 
 			return true;
 		}
@@ -83,7 +83,7 @@ class DoublePlant extends Flowable{
 		);
 	}
 
-	public function onUpdate($type){
+	public function onUpdate(int $type){
 		if($type === Level::BLOCK_UPDATE_NORMAL){
 			$down = $this->getSide(Vector3::SIDE_DOWN);
 			if(!$this->isValidHalfPlant() or (($this->meta & self::BITFLAG_TOP) === 0 and $down->isTransparent())){
@@ -96,27 +96,29 @@ class DoublePlant extends Flowable{
 		return false;
 	}
 
-	public function onBreak(Item $item){
+	public function onBreak(Item $item) : bool{
 		if(parent::onBreak($item) and $this->isValidHalfPlant()){
-			return $this->getLevel()->setBlock($this->getSide(($this->meta & self::BITFLAG_TOP) !== 0 ? Vector3::SIDE_DOWN : Vector3::SIDE_UP), Block::get(Block::AIR));
+			return $this->getLevel()->setBlock($this->getSide(($this->meta & self::BITFLAG_TOP) !== 0 ? Vector3::SIDE_DOWN : Vector3::SIDE_UP), BlockFactory::get(Block::AIR));
 		}
 
 		return false;
 	}
 
-	public function getDrops(Item $item){
+	public function getVariantBitmask() : int{
+		return 0x07;
+	}
+
+	public function getDrops(Item $item) : array{
 		if(!$item->isShears() and ($this->meta === 2 or $this->meta === 3)){ //grass or fern
 			if(mt_rand(0, 24) === 0){
 				return [
-					[Item::SEEDS, 0, 1]
+					Item::get(Item::SEEDS, 0, 1)
 				];
-			}else{
-				return [];
 			}
+
+			return [];
 		}
 
-		return [
-			[$this->id, $this->meta & 0x07, 1]
-		];
+		return parent::getDrops($item);
 	}
 }

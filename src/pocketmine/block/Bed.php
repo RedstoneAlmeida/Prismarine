@@ -43,15 +43,17 @@ class Bed extends Transparent{
 
 	protected $id = self::BED_BLOCK;
 
-	public function __construct($meta = 0){
+	protected $itemId = Item::BED;
+
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	public function getHardness(){
+	public function getHardness() : float{
 		return 0.2;
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return "Bed Block";
 	}
 
@@ -135,7 +137,7 @@ class Bed extends Transparent{
 		return null;
 	}
 
-	public function onActivate(Item $item, Player $player = null){
+	public function onActivate(Item $item, Player $player = null) : bool{
 		if($player !== null){
 			$other = $this->getOtherHalf();
 			if($other === null){
@@ -172,14 +174,14 @@ class Bed extends Transparent{
 
 	}
 
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
+	public function place(Item $item, Block $block, Block $target, int $face, Vector3 $facePos, Player $player = null) : bool{
 		$down = $this->getSide(Vector3::SIDE_DOWN);
 		if(!$down->isTransparent()){
 			$meta = (($player instanceof Player ? $player->getDirection() : 0) - 1) & 0x03;
 			$next = $this->getSide(self::getOtherHalfSide($meta));
 			if($next->canBeReplaced() === true and !$next->getSide(Vector3::SIDE_DOWN)->isTransparent()){
-				$this->getLevel()->setBlock($block, Block::get($this->id, $meta), true, true);
-				$this->getLevel()->setBlock($next, Block::get($this->id, $meta | self::BITFLAG_HEAD), true, true);
+				$this->getLevel()->setBlock($block, BlockFactory::get($this->id, $meta), true, true);
+				$this->getLevel()->setBlock($next, BlockFactory::get($this->id, $meta | self::BITFLAG_HEAD), true, true);
 
 				$nbt = new CompoundTag("", [
 					new StringTag("id", Tile::BED),
@@ -203,8 +205,8 @@ class Bed extends Transparent{
 		return false;
 	}
 
-	public function onBreak(Item $item){
-		$this->getLevel()->setBlock($this, Block::get(Block::AIR), true, true);
+	public function onBreak(Item $item) : bool{
+		$this->getLevel()->setBlock($this, BlockFactory::get(Block::AIR), true, true);
 		if(($other = $this->getOtherHalf()) !== null){
 			$this->getLevel()->useBreakOn($other); //make sure tiles get removed
 		}
@@ -212,21 +214,21 @@ class Bed extends Transparent{
 		return true;
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) : array{
 		if($this->isHeadPart()){
 			$tile = $this->getLevel()->getTile($this);
 			if($tile instanceof TileBed){
 				return [
-					[Item::BED, $tile->getColor(), 1]
+					Item::get($this->getItemId(), $tile->getColor(), 1)
 				];
 			}else{
 				return [
-					[Item::BED, 14, 1] //Red
+					Item::get($this->getItemId(), 14, 1) //Red
 				];
 			}
-		}else{
-			return [];
 		}
+
+		return [];
 	}
 
 }

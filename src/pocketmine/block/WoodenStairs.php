@@ -28,21 +28,22 @@ use pocketmine\item\Tool;
 
 class WoodenStairs extends Stair{
 
-	public function getHardness(){
+	public function getHardness() : float{
 		return 2;
 	}
 
-	public function getResistance(){
+	public function getBlastResistance() : float{
 		return 15;
 	}
 
-	public function getToolType(){
+	public function getToolType() : int{
 		return Tool::TYPE_AXE;
 	}
 
-	public function getDrops(Item $item){
+	public function getDrops(Item $item) : array{
+		//TODO: Hierarchy problem (base class is for stone stairs)
 		return [
-			[$this->id, 0, 1],
+			Item::get($this->getItemId(), $this->getDamage() & $this->getVariantBitmask(), 1)
 		];
 	}
 }

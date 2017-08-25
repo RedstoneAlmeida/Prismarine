@@ -137,11 +137,6 @@ LICENSE;
 		}while(true);
 		$config->set("server-port", $port);
 
-		echo "[*] " . $this->lang->online_mode_info . "\n";
- 		echo "[?] " . $this->lang->online_mode . " (y/N): ";
- 		$config->set("online-mode", strtolower($this->getInput("y")) == "y");
- 		
-
 		$this->message($this->lang->get("gamemode_info"));
 
 		do{

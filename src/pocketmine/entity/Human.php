@@ -24,15 +24,10 @@ declare(strict_types=1);
 namespace pocketmine\entity;
 
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
-use pocketmine\inventory\FloatingInventory;
 use pocketmine\inventory\InventoryHolder;
-use pocketmine\inventory\InventoryType;
 use pocketmine\inventory\PlayerInventory;
-use pocketmine\inventory\SimpleTransactionQueue;
-use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item as ItemItem;
 use pocketmine\level\Level;
 use pocketmine\nbt\NBT;
@@ -58,12 +53,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	/** @var PlayerInventory */
 	protected $inventory;
-
-	/** @var FloatingInventory */
-	protected $floatingInventory;
-
-	/** @var SimpleTransactionQueue */
-	protected $transactionQueue = null;
 
 	/** @var UUID */
 	protected $uuid;
@@ -118,7 +107,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 * @param string $str
 	 * @param string $skinId
 	 */
-	public function setSkin($str, $skinId){
+	public function setSkin(string $str, string $skinId){
 		if(!Player::isValidSkin($str)){
 			throw new \InvalidStateException("Specified skin is not valid, must be 8KiB or 16KiB");
 		}
@@ -288,70 +277,43 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		return $level ** 2 * 4.5 - 162.5 * $level + 2220;
 	}
 
-	public function attack($damage, EntityDamageEvent $source){
-		$cause = $source->getCause();
-		if($cause !== EntityDamageEvent::CAUSE_VOID && $cause !== EntityDamageEvent::CAUSE_CUSTOM && $cause !== EntityDamageEvent::CAUSE_FALL && $cause !== EntityDamageEvent::CAUSE_MAGIC){
-			$modifier = 0;
-			if(($enchantment = $this->inventory->getHelmet()->getEnchantment(Enchantment::PROTECTION)) !== null){
-				$modifier += floor((6 + $enchantment->getLevel() ** 2) / 2);
-			}
-			if(($enchantment = $this->inventory->getChestplate()->getEnchantment(Enchantment::PROTECTION)) !== null){
-				$modifier += floor((6 + $enchantment->getLevel() ** 2) / 2);
-			}
-			if(($enchantment = $this->inventory->getLeggings()->getEnchantment(Enchantment::PROTECTION)) !== null){
-				$modifier += floor((6 + $enchantment->getLevel() ** 2) / 2);
-			}
-			if(($enchantment = $this->inventory->getBoots()->getEnchantment(Enchantment::PROTECTION)) !== null){
-				$modifier += floor((6 + $enchantment->getLevel() ** 2) / 2);
-			}
-			$modifier *= 4;
-			$damage = $source->getFinalDamage();
-			$damage = $damage / 100 * $modifier * -1;
-			$source->setDamage($damage, EntityDamageEvent::MODIFIER_ENCHANTMENT_PROTECTION);
-		}
-		parent::attack($damage, $source);
-	}
-
 	public function getInventory(){
 		return $this->inventory;
 	}
 
-	public function getFloatingInventory(){
-		return $this->floatingInventory;
-	}
-
-	public function getTransactionQueue(){
-		//Is creating the transaction queue ondemand a good idea? I think only if it's destroyed afterwards. hmm...
-		if($this->transactionQueue === null){
-			//Potential for crashes here if a plugin attempts to use this, say for an NPC plugin or something...
-			$this->transactionQueue = new SimpleTransactionQueue($this);
+	/**
+	 * For Human entities which are not players, sets their properties such as nametag, skin and UUID from NBT.
+	 */
+	protected function initHumanData(){
+		if(isset($this->namedtag->NameTag)){
+			$this->setNameTag($this->namedtag["NameTag"]);
 		}
-		return $this->transactionQueue;
- 	}
+
+		if(isset($this->namedtag->Skin) and $this->namedtag->Skin instanceof CompoundTag){
+			$this->setSkin($this->namedtag->Skin["Data"], $this->namedtag->Skin["Name"]);
+		}
+
+		$this->uuid = UUID::fromData((string) $this->getId(), $this->getSkinData(), $this->getNameTag());
+	}
 
 	protected function initEntity(){
 
-		$this->setDataFlag(self::DATA_PLAYER_FLAGS, self::DATA_PLAYER_FLAG_SLEEP, false, self::DATA_TYPE_BYTE);
+		$this->setPlayerFlag(self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->setDataProperty(self::DATA_PLAYER_BED_POSITION, self::DATA_TYPE_POS, [0, 0, 0], false);
 
-		$inventoryContents = ($this->namedtag->Inventory ?? null);
-		$this->inventory = new PlayerInventory($this, $inventoryContents);
+		$this->inventory = new PlayerInventory($this);
+		$this->initHumanData();
 
-		//Virtual inventory for desktop GUI crafting and anti-cheat transaction processing
-		$this->floatingInventory = new FloatingInventory($this);
-
-		if($this instanceof Player){
-			$this->addWindow($this->inventory, 0);
-		}else{
-			if(isset($this->namedtag->NameTag)){
-				$this->setNameTag($this->namedtag["NameTag"]);
+		if(isset($this->namedtag->Inventory) and $this->namedtag->Inventory instanceof ListTag){
+			foreach($this->namedtag->Inventory as $item){
+				if($item["Slot"] >= 0 and $item["Slot"] < 9){ //Hotbar
+					$this->inventory->setHotbarSlotIndex($item["Slot"], isset($item["TrueSlot"]) ? $item["TrueSlot"] : -1);
+				}elseif($item["Slot"] >= 100 and $item["Slot"] < 104){ //Armor
+					$this->inventory->setItem($this->inventory->getSize() + $item["Slot"] - 100, ItemItem::nbtDeserialize($item));
+				}else{
+					$this->inventory->setItem($item["Slot"] - 9, ItemItem::nbtDeserialize($item));
+				}
 			}
-
-			if(isset($this->namedtag->Skin) and $this->namedtag->Skin instanceof CompoundTag){
-				$this->setSkin($this->namedtag->Skin["Data"], $this->namedtag->Skin["Name"]);
-			}
-
-			$this->uuid = UUID::fromData((string) $this->getId(), $this->getSkinData(), $this->getNameTag());
 		}
 
 		if(isset($this->namedtag->SelectedInventorySlot) and $this->namedtag->SelectedInventorySlot instanceof IntTag){
@@ -419,7 +381,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$this->attributeMap->addAttribute(Attribute::getAttribute(Attribute::EXPERIENCE));
 	}
 
-	public function entityBaseTick($tickDiff = 1){
+	public function entityBaseTick(int $tickDiff = 1) : bool{
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
 		$this->doFoodTick($tickDiff);
@@ -468,7 +430,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		}
 	}
 
-	public function getName(){
+	public function getName() : string{
 		return $this->getNameTag();
 	}
 
@@ -487,13 +449,26 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$this->namedtag->Inventory = new ListTag("Inventory", []);
 		$this->namedtag->Inventory->setTagType(NBT::TAG_Compound);
 		if($this->inventory !== null){
-			//Hotbar
-			for($slot = 0; $slot < $this->inventory->getHotbarSize(); ++$slot){
-				$inventorySlotIndex = $this->inventory->getHotbarSlotIndex($slot);
-				$item = $this->inventory->getItem($inventorySlotIndex);
-				$tag = $item->nbtSerialize($slot);
-				$tag->TrueSlot = new ByteTag("TrueSlot", $inventorySlotIndex);
-				$this->namedtag->Inventory[$slot] = $tag;
+			for($slot = 0; $slot < 9; ++$slot){
+				$hotbarSlot = $this->inventory->getHotbarSlotIndex($slot);
+				if($hotbarSlot !== -1){
+					$item = $this->inventory->getItem($hotbarSlot);
+					if($item->getId() !== 0 and $item->getCount() > 0){
+						$tag = $item->nbtSerialize($slot);
+						$tag->TrueSlot = new ByteTag("TrueSlot", $hotbarSlot);
+						$this->namedtag->Inventory[$slot] = $tag;
+
+						continue;
+					}
+				}
+
+				$this->namedtag->Inventory[$slot] = new CompoundTag("", [
+					new ByteTag("Count", 0),
+					new ShortTag("Damage", 0),
+					new ByteTag("Slot", $slot),
+					new ByteTag("TrueSlot", -1),
+					new ShortTag("id", 0)
+				]);
 			}
 
 			//Normal inventory
@@ -540,12 +515,8 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			$pk->uuid = $this->getUniqueId();
 			$pk->username = $this->getName();
 			$pk->entityRuntimeId = $this->getId();
-			$pk->x = $this->x;
-			$pk->y = $this->y;
-			$pk->z = $this->z;
-			$pk->speedX = $this->motionX;
-			$pk->speedY = $this->motionY;
-			$pk->speedZ = $this->motionZ;
+			$pk->position = $this->asVector3();
+			$pk->motion = $this->getMotion();
 			$pk->yaw = $this->yaw;
 			$pk->pitch = $this->pitch;
 			$pk->item = $this->getInventory()->getItemInHand();
@@ -562,13 +533,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	public function close(){
 		if(!$this->closed){
-			if($this->getFloatingInventory() instanceof FloatingInventory){
- 				foreach($this->getFloatingInventory()->getContents() as $craftingItem){
- 					$this->level->dropItem($this, $craftingItem);
- 				}
- 			}else{
- 				$this->server->getLogger()->debug("Attempted to drop a null crafting inventory\n");
- 			}
 			if($this->inventory !== null){
 				foreach($this->inventory->getViewers() as $viewer){
 					$viewer->removeWindow($this->inventory);
@@ -576,5 +540,25 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			}
 			parent::close();
 		}
+	}
+
+	/**
+	 * Wrapper around {@link Entity#getDataFlag} for player-specific data flag reading.
+	 *
+	 * @param int $flagId
+	 * @return bool
+	 */
+	public function getPlayerFlag(int $flagId){
+		return $this->getDataFlag(self::DATA_PLAYER_FLAGS, $flagId);
+	}
+
+	/**
+	 * Wrapper around {@link Entity#setDataFlag} for player-specific data flag setting.
+	 *
+	 * @param int  $flagId
+	 * @param bool $value
+	 */
+	public function setPlayerFlag(int $flagId, bool $value = true){
+		$this->setDataFlag(self::DATA_PLAYER_FLAGS, $flagId, $value, self::DATA_TYPE_BYTE);
 	}
 }
