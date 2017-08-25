@@ -40,13 +40,25 @@ abstract class Projectile extends Entity{
 
 	protected $damage = 0;
 
+	protected $shootingEntity;
+
 	public $hadCollision = false;
 
 	public function __construct(Level $level, CompoundTag $nbt, Entity $shootingEntity = null){
 		if($shootingEntity !== null){
 			$this->setOwningEntity($shootingEntity);
+			$this->shootingEntity = $shootingEntity;
 		}
 		parent::__construct($level, $nbt);
+	}
+
+	public function getShootingEntity(){
+		return $this->shootingEntity;
+	}
+
+	public function setShootingEntity(Entity $entity){
+		$this->setOwningEntity($entity);
+		$this->shootingEntity = $entity;
 	}
 
 	public function attack($damage, EntityDamageEvent $source){

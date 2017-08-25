@@ -229,6 +229,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public $joined = false;
 	public $gamemode;
 	public $lastBreak;
+	public $lastProjectile;
 
 	protected $windowCnt = 2;
 	/** @var \SplObjectStorage<Inventory> */
@@ -663,6 +664,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->namedtag = new CompoundTag();
 		$this->server = Server::getInstance();
 		$this->lastBreak = PHP_INT_MAX;
+		$this->lastProjectile = PHP_INT_MAX;
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->clientID = $clientID;
@@ -2378,11 +2380,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$f = 1.5;
 				$snowball = Entity::createEntity("Snowball", $this->getLevel(), $nbt, $this);
 				$snowball->setMotion($snowball->getMotion()->multiply($f));
+				$this->lastProjectile = microtime(true);
 				if($this->isSurvival()){
 					$item->setCount($item->getCount() - 1);
 					$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
 				}
 				if($snowball instanceof Projectile){
+					$snowball->setShootingEntity($this);
 					$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($snowball));
 					if($projectileEv->isCancelled()){
 						$snowball->kill();
@@ -2393,7 +2397,86 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}else{
 					$snowball->spawnToAll();
 				}
+			}elseif($item->getId() === Item::EGG){
+				$nbt = new CompoundTag("", [
+					new ListTag("Pos", [
+						new DoubleTag("", $this->x),
+						new DoubleTag("", $this->y + $this->getEyeHeight()),
+						new DoubleTag("", $this->z)
+					]),
+					new ListTag("Motion", [
+						new DoubleTag("", $aimPos->x),
+						new DoubleTag("", $aimPos->y),
+						new DoubleTag("", $aimPos->z)
+					]),
+					new ListTag("Rotation", [
+						new FloatTag("", $this->yaw),
+						new FloatTag("", $this->pitch)
+					]),
+				]);
+
+				$f = 1.5;
+				$egg = Entity::createEntity("Egg", $this->getLevel(), $nbt, $this);
+				$egg->setMotion($egg->getMotion()->multiply($f));
+				$this->lastProjectile = microtime(true);
+				if($this->isSurvival()){
+					$item->setCount($item->getCount() - 1);
+					$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
+				}
+				if($egg instanceof Projectile){
+					$egg->setShootingEntity($this);
+					$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($egg));
+					if($projectileEv->isCancelled()){
+						$egg->kill();
+					}else{
+						$egg->spawnToAll();
+						$this->level->addSound(new LaunchSound($this), $this->getViewers());
+					}
+				}else{
+					$egg->spawnToAll();
+				}
+			}elseif($item->getId() === Item::ENDER_PEARL){
+				if($this->lastProjectile === PHP_INT_MAX or microtime(true) - $this->lastProjectile >= 1){
+					$nbt = new CompoundTag("", [
+						new ListTag("Pos", [
+							new DoubleTag("", $this->x),
+							new DoubleTag("", $this->y + $this->getEyeHeight()),
+							new DoubleTag("", $this->z)
+						]),
+						new ListTag("Motion", [
+							new DoubleTag("", $aimPos->x),
+							new DoubleTag("", $aimPos->y),
+							new DoubleTag("", $aimPos->z)
+						]),
+						new ListTag("Rotation", [
+							new FloatTag("", $this->yaw),
+							new FloatTag("", $this->pitch)
+						]),
+					]);
+
+					$f = 1.5;
+					$pearl = Entity::createEntity("EnderPearl", $this->getLevel(), $nbt, $this);
+					$pearl->setMotion($pearl->getMotion()->multiply($f));
+					$this->lastProjectile = microtime(true);
+					if($this->isSurvival()){
+						$item->setCount($item->getCount() - 1);
+						$this->inventory->setItemInHand($item->getCount() > 0 ? $item : Item::get(Item::AIR));
+					}
+					if($pearl instanceof Projectile){
+						$pearl->setShootingEntity($this);
+						$this->server->getPluginManager()->callEvent($projectileEv = new ProjectileLaunchEvent($pearl));
+						if($projectileEv->isCancelled()){
+							$pearl->kill();
+						}else{
+							$pearl->spawnToAll();
+							$this->level->addSound(new LaunchSound($this), $this->getViewers());
+						}
+					}else{
+						$pearl->spawnToAll();
+					}
+				}
 			}
+
 
 			if($item instanceof Armor){
 				switch($item->getId()){
