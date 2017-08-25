@@ -633,7 +633,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function sendCommandData(){
 		//TODO: this needs fixing
-		/*
 		$data = [];
 		foreach($this->server->getCommandMap()->getCommands() as $command){
 			if(count($cmdData = $command->generateCustomCommandData($this)) > 0){
@@ -644,9 +643,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(count($data) > 0){
 			//TODO: structure checking
 			$pk = new AvailableCommandsPacket();
-			$pk->commands = json_encode($data);
+			$pk->commands = $data;
 			$this->dataPacket($pk);
-		}*/
+		}
 
 	}
 
@@ -3495,11 +3494,19 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->dataPacket($pk);
 	}
 
+	/**
+ 	 * Sends a popup message to the player
+ 	 *
+ 	 * TODO: add translation type popups
+ 	 *
+ 	 * @param string $message
+  	 * @param string $subtitle @deprecated
+ 	 */
+
 	public function sendPopup(string $message, string $subtitle = ""){
 		$pk = new TextPacket();
 		$pk->type = TextPacket::TYPE_POPUP;
-		$pk->source = $message;
-		$pk->message = $subtitle;
+		$pk->message = $message;
 		$this->dataPacket($pk);
 	}
 
