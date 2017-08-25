@@ -2523,6 +2523,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 									$ev->getProjectile()->kill();
 									$this->inventory->sendContents($this);
 								}else{
+									$ev->getProjectile()->setBow(clone $bow);
 									$ev->getProjectile()->setMotion($ev->getProjectile()->getMotion()->multiply($ev->getForce()));
 									if($this->isSurvival()){
 										$this->inventory->removeItem(Item::get(Item::ARROW, 0, 1));
@@ -2742,6 +2743,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				$this->removeAllEffects();
 				$this->setHealth($this->getMaxHealth());
+				$this->setFood(20);
 
 				foreach($this->attributeMap->getAll() as $attr){
 					$attr->resetToDefault();
