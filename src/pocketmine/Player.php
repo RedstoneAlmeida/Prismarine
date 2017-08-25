@@ -181,6 +181,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	const SPECTATOR = 3;
 	const VIEW = Player::SPECTATOR;
 
+	const CRAFTING_SMALL = 0;
+	const CRAFTING_BIG = 1;
+	const CRAFTING_ANVIL = 2;
+	const CRAFTING_ENCHANT = 3;
+
 	/**
 	 * Checks a supplied username and checks it is valid.
 	 * @param string $name
@@ -237,7 +242,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public $achievements = [];
 
-	public $craftingType = 0; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
+	public $craftingType = self::CRAFTING_SMALL; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = anvil, 3 = enchanting
 
 	/** @var PlayerCursorInventory */
 	protected $cursorInventory;
@@ -2044,7 +2049,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-		$this->craftingType = 0;
+		$this->craftingType = self::CRAFTING_SMALL;
 
 		$message = TextFormat::clean($message, $this->removeFormat);
 		foreach(explode("\n", $message) as $messagePart){
@@ -2115,7 +2120,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->spawned === false or !$this->isAlive()){
 			return true;
 		}
-		$this->craftingType = 0;
+		$this->craftingType = self::CRAFTING_SMALL;
 
 		$this->setGenericFlag(self::DATA_FLAG_ACTION, false); //TODO: check if this should be true
 
@@ -2242,7 +2247,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							return true;
 						}
 
-						$this->craftingType = 0;
+						$this->craftingType = self::CRAFTING_SMALL;
 
 						$item = $this->inventory->getItemInHand();
 						$oldItem = clone $item;
@@ -2616,7 +2621,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		$this->craftingType = 0;
+		$this->craftingType = self::CRAFTING_SMALL;
 
 		$target = $this->level->getEntity($packet->target);
 		if($target === null){
@@ -2710,7 +2715,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					break;
 				}
 
-				$this->craftingType = 0;
+				$this->craftingType = self::CRAFTING_SMALL;
 
 				$this->server->getPluginManager()->callEvent($ev = new PlayerRespawnEvent($this, $this->getSpawn()));
 
@@ -2861,7 +2866,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		$this->craftingType = 0;
+		$this->craftingType = self::CRAFTING_SMALL;
 
 		if(isset($this->windowIndex[$packet->windowId])){
 			$this->server->getPluginManager()->callEvent(new InventoryCloseEvent($this->windowIndex[$packet->windowId], $this));
@@ -2892,6 +2897,34 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
+
+		if($this->craftingType === self::CRAFTING_ANVIL){
+			$anvilInventory = $this->windowIndex[$packet->windowId] ?? null;
+			if($anvilInventory === null){
+				foreach($this->windowIndex as $window){
+					if($window instanceof AnvilInventory){
+						$anvilInventory = $window;
+						break;
+					}
+				}
+				if($anvilInventory === null){ //If it's _still_ null, then the player doesn't have a valid anvil window, cannot proceed.
+					$this->getServer()->getLogger()->debug("Couldn't find an anvil window for ".$this->getName().", exiting");
+					$this->inventory->sendContents($this);
+					return true;
+				}
+			}
+
+			if($recipe === null){
+				//Item renamed
+				if(!$anvilInventory->onRename($this, $packet->output[0])){
+					$this->getServer()->getLogger()->debug($this->getName()." failed to rename an item in an anvil");
+					$this->inventory->sendContents($this);
+				}
+			}else{
+				//TODO: Anvil crafting recipes
+			}
+			return true;
+		}
 
 		$craftSlots = $this->inventory->getCraftContents();
 		try {
@@ -3021,7 +3054,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->spawned === false or !$this->isAlive()){
 			return true;
 		}
-		$this->craftingType = 0;
+		$this->craftingType = self::CRAFTING_SMALL;
 
 		$pos = new Vector3($packet->x, $packet->y, $packet->z);
 		if($pos->distanceSquared($this) > 10000){

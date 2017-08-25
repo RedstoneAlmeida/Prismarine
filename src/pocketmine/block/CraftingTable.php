@@ -49,7 +49,7 @@ class CraftingTable extends Solid{
 
 	public function onActivate(Item $item, Player $player = null) : bool{
 		if($player instanceof Player){
-			$player->craftingType = 1;
+			$player->craftingType = Player::CRAFTING_BIG;
 		}
 
 		return true;
