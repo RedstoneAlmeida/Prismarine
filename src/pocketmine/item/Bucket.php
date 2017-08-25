@@ -26,10 +26,12 @@ namespace pocketmine\item;
 use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
+use pocketmine\block\FlowingLava;
 use pocketmine\block\Liquid;
 use pocketmine\event\player\PlayerBucketFillEvent;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\Player;
 
 class Bucket extends Item{
@@ -58,6 +60,12 @@ class Bucket extends Item{
 				$result->setDamage($target->getId());
 				$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 				if(!$ev->isCancelled()){
+					if($target instanceof FlowingLava){
+ 						$soundId = LevelSoundEventPacket::SOUND_BUCKET_FILL_LAVA;
+					}else{
+ 						$soundId = LevelSoundEventPacket::SOUND_BUCKET_FILL_WATER;
+ 					}
+ 					$player->getLevel()->broadcastLevelSoundEvent($target, $soundId);
 					$player->getLevel()->setBlock($target, BlockFactory::get(Block::AIR), true, true);
 					if($player->isSurvival()){
 						$player->getInventory()->setItemInHand($ev->getItem());
@@ -72,6 +80,12 @@ class Bucket extends Item{
 			$result->setDamage(0);
 			$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
 			if(!$ev->isCancelled()){
+				if($targetBlock instanceof FlowingLava){
+ 					$soundId = LevelSoundEventPacket::SOUND_BUCKET_EMPTY_LAVA;
+  				}else{
+ 					$soundId = LevelSoundEventPacket::SOUND_BUCKET_EMPTY_WATER;
+ 				}
+  				$player->getLevel()->broadcastLevelSoundEvent($targetBlock, $soundId);
 				$player->getLevel()->setBlock($block, $targetBlock, true, true);
 				if($player->isSurvival()){
 					$player->getInventory()->setItemInHand($ev->getItem());

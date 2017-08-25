@@ -70,5 +70,6 @@ abstract class Food extends Item implements FoodSource{
 		}
 
 		$human->getInventory()->setItemInHand($ev->getResidue());
+		$human->getLevel()->broadcastLevelSoundEvent($human->add(0, 2, 0), LevelSoundEventPacket::SOUND_BURP);
 	}
 }

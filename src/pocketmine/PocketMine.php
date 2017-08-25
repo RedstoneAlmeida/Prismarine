@@ -78,7 +78,7 @@ namespace pocketmine {
 	use pocketmine\wizard\SetupWizard;
 	use raklib\RakLib;
 
-	const VERSION = "1.2.0";
+	const VERSION = "1.2.0.18";
 	const API_VERSION = "3.0.0";
 	const CODENAME = "Pumpkin Pie";
 
@@ -504,7 +504,7 @@ namespace pocketmine {
 
 
 		if(\Phar::running(true) === ""){
-			$logger->warning("Non-packaged PocketMine-MP installation detected, do not use on production.");
+			$logger->warning("Non-packaged Prismarine installation detected, do not use on production.");
 		}
 
 		ThreadManager::init();

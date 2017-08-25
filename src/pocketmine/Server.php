@@ -22,8 +22,8 @@
 declare(strict_types=1);
 
 /**
- * PocketMine-MP is the Minecraft: PE multiplayer server software
- * Homepage: http://www.pocketmine.net/
+ * Prismarine is the Minecraft multiplayer server software
+ * Homepage: https://github.com/PrismarineMC/Prismarine
  */
 namespace pocketmine;
 
@@ -566,7 +566,7 @@ class Server{
 	 * @return string
 	 */
 	public function getMotd() : string{
-		return $this->getConfigString("motd", "Minecraft: PE Server");
+		return $this->getConfigString("motd", "Minecraft Server");
 	}
 
 	/**
@@ -1453,7 +1453,7 @@ class Server{
 
 			$this->logger->info("Loading server properties...");
 			$this->properties = new Config($this->dataPath . "server.properties", Config::PROPERTIES, [
-				"motd" => "Minecraft: PE Server",
+				"motd" => "Minecraft Server",
 				"server-port" => 19132,
 				"white-list" => false,
 				"announce-player-achievements" => true,
@@ -1475,8 +1475,16 @@ class Server{
 				"enable-rcon" => false,
 				"rcon.password" => substr(base64_encode(random_bytes(20)), 3, 10),
 				"auto-save" => true,
+				"online-mode" => true,
 				"view-distance" => 8
 			]);
+
+			if(!$this->getConfigBoolean("online-mode", true)){
+ 				$this->logger->warning("SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
+ 				$this->logger->warning("The server will make no attempt to authenticate usernames. Beware.");
+ 				$this->logger->warning("While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.");
+ 				$this->logger->warning("To change this, set \"online-mode\" to \"true\" in the server.properties file.");
+			}
 
 			$this->forceLanguage = $this->getProperty("settings.force-language", false);
 			$this->baseLang = new BaseLang($this->getProperty("settings.language", BaseLang::FALLBACK_LANGUAGE));
@@ -1569,7 +1577,7 @@ class Server{
 
 			$this->logger->info($this->getLanguage()->translateString("pocketmine.server.info", [
 				$this->getName(),
-				($version->isDev() ? TextFormat::YELLOW : "") . $version->get(true) . TextFormat::WHITE,
+				($version->isDev() ? TextFormat::YELLOW : "") . $this->getPocketMineVersion() . TextFormat::WHITE,
 				$this->getCodename(),
 				$this->getApiVersion()
 			]));

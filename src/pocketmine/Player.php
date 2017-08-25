@@ -1932,6 +1932,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->iusername = strtolower($this->username);
 		$this->setDataProperty(self::DATA_NAMETAG, self::DATA_TYPE_STRING, $this->username, false);
 
+		if($this->server->getConfigBoolean("online-mode", true) && $packet->identityPublicKey === null){
+			$this->kick("disconnectionScreen.notAuthenticated", false);
+			return true;
+		}
+
+
 		if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() and $this->kick("disconnectionScreen.serverFull", false)){
 			return true;
 		}
@@ -2098,6 +2104,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
 		//TODO: add events so plugins can change this
+		if($packet->sound === LevelSoundEventPacket::SOUND_ATTACK_NODAMAGE and $this->isSpectator()){
+ 			return false;
+ 		}
 		$this->getLevel()->addChunkPacket($this->chunk->getX(), $this->chunk->getZ(), $packet);
 		return true;
 	}
@@ -2525,7 +2534,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 											$ev->getProjectile()->kill();
 										}else{
 											$ev->getProjectile()->spawnToAll();
-											$this->level->addSound(new LaunchSound($this), $this->getViewers());
+											$this->level->broadcastLevelSoundEvent($this, LevelSoundEventPacket::SOUND_BOW);
 										}
 									}else{
 										$ev->getProjectile()->spawnToAll();

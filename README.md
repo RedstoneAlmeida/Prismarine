@@ -1,14 +1,16 @@
 Prismarine [![Build Status](https://travis-ci.org/PrismarineMC/Prismarine.svg?branch=master)](https://travis-ci.org/PrismarineMC/Prismarine) [![CircleCI](https://circleci.com/gh/PrismarineMC/Prismarine.svg?style=svg)](https://circleci.com/gh/PrismarineMC/Prismarine)
 ===================
 
-__An server software for Minecraft: Pocket Edition & Windows 10 Edition__
+__An server software for Minecraft 1.2__
 
+**WARNING! This server software isn't compatible with Minecraft: Java Edition**
 
 Introduction
 -------------
 Prismarine is a server software based on **[PocketMine-MP](https://github.com/pmmp/PocketMine-MP)** with extended functionality. Most of the original code was written by **PocketMine Team**.<br>
 Some of the extended functionality that Prismarine offers:
 
+* Xbox Live authentication checking
 * Working crafting
 
 However, Prismarine still has a long way to go. We welcome contributions.
