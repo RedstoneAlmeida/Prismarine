@@ -739,7 +739,7 @@ class Block extends Position implements BlockIds, Metadatable{
 	 * @return AxisAlignedBB|null
 	 */
 	protected function recalculateBoundingBox(){
-		if($this->x === null || $this->y === null || $this->z === null)}{
+		if($this->x === null || $this->y === null || $this->z === null){
 			return null;
 		}
 		return new AxisAlignedBB(
