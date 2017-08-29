@@ -353,7 +353,7 @@ class Block extends Position implements BlockIds, Metadatable{
 	public function getBreakTime(Item $item) : float{
 		$base = $this->getHardness() * 1.5;
 		if($this->canBeBrokenWith($item)){
-			if($this->getToolType() === Tool::TYPE_SHEARS and $item->isShears()){
+			if(($this->getToolType() === Tool::TYPE_SHEARS and $item->isShears()) or ($this->getToolType() === Tool::TYPE_SWORD and $item->isSword())){
 				$base /= 15;
 			}elseif(
 				($this->getToolType() === Tool::TYPE_PICKAXE and ($tier = $item->isPickaxe()) !== false) or
