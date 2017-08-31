@@ -135,7 +135,7 @@ abstract class Tool extends Item{
 	 */
 	public function setUnbreakable(bool $unbreakable){
 		$tag = $this->getNamedTag() ?? new CompoundTag("", []);
-		$tag->Unbreakable = new IntTag("Unbreakable", $unbreakable);
+		$tag->Unbreakable = new IntTag("Unbreakable", $unbreakable ? 1 : 0);
 
 		$this->setNamedTag($tag);
 
