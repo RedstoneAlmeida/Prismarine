@@ -26,6 +26,8 @@ namespace pocketmine\item;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\item\enchantment\Enchantment;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\IntTag;
 
 abstract class Tool extends Item{
 	const TIER_WOODEN = 1;
