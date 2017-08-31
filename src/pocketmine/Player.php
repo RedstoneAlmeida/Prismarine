@@ -257,6 +257,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $username;
 	protected $iusername;
 	protected $displayName;
+	protected $languageCode = "en_UK";
 	protected $startAction = -1;
 	/** @var Vector3|null */
 	protected $sleeping = null;
@@ -1868,6 +1869,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->displayName = $this->username;
 		$this->iusername = strtolower($this->username);
 		$this->setDataProperty(self::DATA_NAMETAG, self::DATA_TYPE_STRING, $this->username, false);
+
+		$this->languageCode = $packet->languageCode;
 
 		if($this->server->getConfigBoolean("online-mode", false) && $packet->identityPublicKey === null){
 			$this->kick("disconnectionScreen.notAuthenticated", false);
@@ -3628,6 +3631,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	public function getName(){
 		return $this->username;
+	}
+
+	/**
+	 * Gets client's language
+	 *
+	 * @return string
+	 */
+	public function getLanguageCode(): string{
+		return $this->languageCode;
 	}
 
 	/**
