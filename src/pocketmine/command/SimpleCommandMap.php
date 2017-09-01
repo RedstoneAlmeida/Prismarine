@@ -248,6 +248,14 @@ class SimpleCommandMap implements CommandMap{
 		return true;
 	}
 
+	public function unregister(Command $command) : bool{
+		if(!in_array($command, $this->knownCommands))
+			return false;
+		$command->unregister($this);
+		unset($this->knownCommands[array_search($command, $this->knownCommands)]);
+		return true;
+	}
+
 	public function clearCommands(){
 		foreach($this->knownCommands as $command){
 			$command->unregister($this);
