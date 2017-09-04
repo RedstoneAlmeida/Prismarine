@@ -849,6 +849,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$entity->spawnTo($this);
 				}
 			}
+			$viewDistance = $this->viewDistance;
+			$this->setViewDistance(24);
+			$this->setViewDistance($viewDistance);
 		}
 
 		if($this->chunkLoadCount >= $this->spawnThreshold and $this->spawned === false){
