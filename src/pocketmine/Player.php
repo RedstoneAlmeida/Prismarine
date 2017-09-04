@@ -166,6 +166,7 @@ use pocketmine\permission\PermissionAttachment;
 use pocketmine\permission\PermissionAttachmentInfo;
 use pocketmine\plugin\Plugin;
 use pocketmine\resourcepacks\ResourcePack;
+use pocketmine\scheduler\CallbackTask;
 use pocketmine\tile\ItemFrame;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
@@ -841,6 +842,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->chunkLoadCount++;
 
+		$pk = new ChunkRadiusUpdatedPacket();
+		$pk->radius = 24;
+		$this->server->getScheduler()->scheduleDelayedTask(new CallbackTask([$this, "dataPacket"], [$pk]), 5);
+
+		$pk1 = new ChunkRadiusUpdatedPacket();
+		$pk1->radius = $this->viewDistance;
+		$this->server->getScheduler()->scheduleDelayedTask(new CallbackTask([$this, "dataPacket"], [$pk1]), 10);
+
 		$this->dataPacket($payload);
 
 		if($this->spawned){
@@ -849,9 +858,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$entity->spawnTo($this);
 				}
 			}
-			$viewDistance = $this->viewDistance;
-			$this->setViewDistance(24);
-			$this->setViewDistance($viewDistance);
 		}
 
 		if($this->chunkLoadCount >= $this->spawnThreshold and $this->spawned === false){
