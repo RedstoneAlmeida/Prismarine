@@ -516,6 +516,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function resetFallDistance(){
 		parent::resetFallDistance();
+		$this->resetAirTicks();
+	}
+
+	public function resetAirTicks(){
 		if($this->inAirTicks !== 0){
 			$this->startAirTicks = 5;
 		}
