@@ -758,6 +758,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		return $this->inAirTicks;
 	}
 
+	public function getStartAirTicks(){
+		return $this->startAirTicks;
+	}
+
 	protected function switchLevel(Level $targetLevel){
 		$oldLevel = $this->level;
 		if(parent::switchLevel($targetLevel)){
