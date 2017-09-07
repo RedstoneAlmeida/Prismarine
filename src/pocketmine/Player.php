@@ -512,6 +512,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function resetFallDistance(){
 		parent::resetFallDistance();
+		$this->resetAirTicks();
+	}
+
+	public function resetAirTicks(){
 		if($this->inAirTicks !== 0){
 			$this->startAirTicks = 5;
 		}
@@ -779,6 +783,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function getInAirTicks() : int{
 		return $this->inAirTicks;
+	}
+
+	public function getStartAirTicks() : int{
+		return $this->startAirTicks;
 	}
 
 	protected function switchLevel(Level $targetLevel) : bool{
@@ -3039,7 +3047,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->inventory->setHotbarSlotIndex($hotbarSlot, $slotLink === -1 ? $slotLink : $slotLink - 9);
 		}
 
-		$this->inventory->equipItem($packet->selectedSlot);
+		$this->inventory->equipItem($packet->selectedHotbarSlot);
 
 		return true;
 	}
