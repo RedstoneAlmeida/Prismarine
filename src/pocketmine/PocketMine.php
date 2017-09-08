@@ -78,7 +78,7 @@ namespace pocketmine {
 	use pocketmine\wizard\SetupWizard;
 	use raklib\RakLib;
 
-	const VERSION = "1.2.0.25";
+	const VERSION = "1.2.0.31";
 	const API_VERSION = "3.0.0";
 	const CODENAME = "Pumpkin Pie";
 
