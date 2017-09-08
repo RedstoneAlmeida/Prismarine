@@ -15,6 +15,14 @@ Some of the extended functionality that Prismarine offers:
 
 However, Prismarine still has a long way to go. We welcome contributions.
 
+
+Can I test this before I download it?
+-------------
+Yes, you can. Server below is made by main developer of Prismarine and it's 100% based on Prismarine.<br>
+
+IP: **elysium.fun**
+Port: **19132**
+
 Help & Support
 -------------
 <!--[Official Doxygen-generated Documentation](https://storage.googleapis.com/itx-technologies-141911.appspot.com/genisys/docs/index.html)-->
