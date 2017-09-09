@@ -68,7 +68,7 @@ class WindowInventory extends CustomInventory{
         $pk->x = $holder->x;
         $pk->y = $holder->y;
         $pk->z = $holder->z;
-        $pk->namedtag = $nbt->write();
+        $pk->namedtag = $nbt->write(true);
         $who->dataPacket($pk);
         parent::onOpen($who);
         $this->sendContents($who);
