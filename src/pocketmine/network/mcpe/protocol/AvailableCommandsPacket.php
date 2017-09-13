@@ -87,7 +87,7 @@ class AvailableCommandsPacket extends DataPacket{
 		$enums = [];
 		$commandsStream = new BinaryStream();
 		foreach($this->commands as $commandName => $commandData){
-			if($commandName == 'help'){ //temp fix for 1.2
+			if($commandName === 'help'){ //temp fix for 1.2
 				continue;
 			}
 			$commandsStream->putString($commandName);
@@ -120,9 +120,9 @@ class AvailableCommandsPacket extends DataPacket{
 				$aliasesEnumId = -1;
 			}
 			$commandsStream->putLInt($aliasesEnumId);
-			$commandsStream->putVarInt(count($commandData['versions'][0]['overloads'])); // overloads
+			$commandsStream->putUnsignedVarInt(count($commandData['versions'][0]['overloads'])); // overloads
 			foreach($commandData['versions'][0]['overloads'] as $overloadData){
-				$commandsStream->putVarInt(count($overloadData['input']['parameters']));
+				$commandsStream->putUnsignedVarInt(count($overloadData['input']['parameters']));
 				$paramNum = count($overloadData['input']['parameters']);
 				foreach ($overloadData['input']['parameters'] as $paramData) {
 					$commandsStream->putString($paramData['name']);
@@ -137,17 +137,17 @@ class AvailableCommandsPacket extends DataPacket{
 				}
 			}
 		}
-		$this->putVarInt($enumValuesCount);
+		$this->putUnsignedVarInt($enumValuesCount);
 		for($i = 0; $i < $enumValuesCount; $i++){
 			$this->putString($enumValues[$i]);
 		}
-		$this->putVarInt(0);
+		$this->putUnsignedVarInt(0);
 		$enumsCount = count($enums);
-		$this->putVarInt($enumsCount);
+		$this->putUnsignedVarInt($enumsCount);
 		for($i = 0; $i < $enumsCount; $i++){
 			$this->putString($enums[$i]['name']);
 			$dataCount = count($enums[$i]['data']);
-			$this->putVarInt($dataCount);
+			$this->putUnsignedVarInt($dataCount);
 			for($j = 0; $j < $dataCount; $j++){
 				if($enumValuesCount < 256){
 					$this->putByte($enums[$i]['data'][$j]);
@@ -159,7 +159,7 @@ class AvailableCommandsPacket extends DataPacket{
 			}
 		}
 		
-		$this->putVarInt(count($this->commands));
+		$this->putUnsignedVarInt(count($this->commands));
 		$this->put($commandsStream->buffer);
 	}
 
