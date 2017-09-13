@@ -3494,6 +3494,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!$this->server->isLanguageForced()){
 			$pk->type = TextPacket::TYPE_TRANSLATION;
 			$pk->message = $this->server->getLanguage()->translateString($message, $parameters, "pocketmine.");
+			$pk->message = $this->server->getLanguage()->translateString($pk->message, $parameters, "commands.");
 			foreach($parameters as $i => $p){
 				$parameters[$i] = $this->server->getLanguage()->translateString($p, $parameters, "pocketmine.");
 			}

@@ -38,12 +38,12 @@ class AvailableCommandsPacket extends DataPacket{
 	const ARG_TYPE_FLOAT = 0x02;
 	const ARG_TYPE_VALUE = 0x03;
 	const ARG_TYPE_TARGET = 0x04;
-	const ARG_TYPE_STRING = 0x0c;
-	const ARG_TYPE_POSITION = 0x0d;
-	const ARG_TYPE_RAWTEXT = 0x10;
-	const ARG_TYPE_TEXT = 0x12;
-	const ARG_TYPE_JSON = 0x15;
-	const ARG_TYPE_COMMAND = 0x1c;
+	const ARG_TYPE_STRING = 0x0d;
+	const ARG_TYPE_POSITION = 0x0e;
+	const ARG_TYPE_RAWTEXT = 0x11;
+	const ARG_TYPE_TEXT = 0x13;
+	const ARG_TYPE_JSON = 0x16;
+	const ARG_TYPE_COMMAND = 0x1d;
 
 	public $commands = [];
 	
