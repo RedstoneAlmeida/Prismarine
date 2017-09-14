@@ -31,6 +31,7 @@ use pocketmine\event\entity\EntityDeathEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\Timings;
 use pocketmine\item\Item as ItemItem;
+use pocketmine\level\particle\CriticalParticle;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -344,6 +345,19 @@ abstract class Living extends Entity implements Damageable{
 
 		if($this->hasEffect(Effect::DAMAGE_RESISTANCE)){
 			$source->setDamage(-($source->getDamage(EntityDamageEvent::MODIFIER_BASE) * 0.20 * $this->getEffect(Effect::DAMAGE_RESISTANCE)->getEffectLevel()), EntityDamageEvent::MODIFIER_RESISTANCE);
+		}
+
+		if($source instanceof EntityDamageByEntityEvent){
+			$damager = $source->getDamager();
+			if($damager instanceof Player){
+				if(!$damager->isOnGround()){
+					//Critical hit
+					for($i = 0; $i < 5; $i++){
+						$this->level->addParticle(new CriticalParticle(new Vector3($this->x + mt_rand(-15, 15) / 10, $this->y + mt_rand(0, 20) / 10, $this->z + mt_rand(-15, 15) / 10)));
+					}
+					$source->setDamage($source->getDamage() / 2, EntityDamageEvent::MODIFIER_CRITICAL);
+				}
+			}
 		}
 
 		parent::attack($damage, $source);
