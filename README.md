@@ -10,9 +10,9 @@ Introduction
 Prismarine is a server software based on **[PocketMine-MP](https://github.com/pmmp/PocketMine-MP)** with extended functionality. Most of the original code was written by **PocketMine Team**.<br>
 Some of the extended functionality that Prismarine offers:
 
-* Xbox Live authentication checking
-* Working crafting
+* Online-mode
 * Working enchantments - W.I.P - 8/26 of enchantments working
+* Critical hits
 
 However, Prismarine still has a long way to go. We welcome contributions.
 
