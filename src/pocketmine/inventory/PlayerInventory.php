@@ -544,7 +544,7 @@ class PlayerInventory extends BaseInventory{
 	public function sendCreativeContents(){
 		$pk = new InventoryContentPacket();
 		$pk->windowId = ContainerIds::CREATIVE;
-		if(!$this->holder->isSpectator()){
+		if(!$this->getHolder()->isSpectator()){
 			foreach(Item::getCreativeItems() as $i => $item){
 				$pk->items[$i] = clone $item;
 			}
