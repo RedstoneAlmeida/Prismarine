@@ -40,17 +40,7 @@ use pocketmine\Server;
 
 class PlayerInventory extends BaseInventory{
 
-	const CREATIVE_INDEX = -2;
-	const CRAFT_INDEX_0 = -3;
-	const CRAFT_INDEX_1 = -4;
-	const CRAFT_INDEX_2 = -5;
-	const CRAFT_INDEX_3 = -6;
-	const CRAFT_INDEX_4 = -7;
-	const CRAFT_INDEX_5 = -8;
-	const CRAFT_INDEX_6 = -9;
-	const CRAFT_INDEX_7 = -10;
-	const CRAFT_INDEX_8 = -11;
-	const CRAFT_RESULT_INDEX = -12;
+	const CURSOR_INDEX = -1;
 
 	/** @var Human */
 	protected $holder;
@@ -63,6 +53,8 @@ class PlayerInventory extends BaseInventory{
 	protected $craftSlots = [ 0 => null, 1 => null, 2 => null, 3 => null, 4 => null, 5 => null, 6 => null, 7 => null, 8 => null ];
 	/** @var Item */
 	protected $craftResult = null;
+	/** @var Item */
+	protected $cursor = null;
 
 	public function __construct(Human $player){
 		$this->resetHotbar(false);
@@ -191,6 +183,14 @@ class PlayerInventory extends BaseInventory{
 		$pk->windowId = ContainerIds::INVENTORY;
 		$pk->selectedHotbarSlot = $this->getHeldItemIndex();
 		$pk->slots = array_map(function(int $link){ return $link + $this->getHotbarSize(); }, $this->getHotbar());
+		$this->getHolder()->dataPacket($pk);
+	}
+
+	public function sendCursor(){
+		$pk = new InventorySlotPacket();
+		$pk->inventorySlot = 0;
+		$pk->item = clone $this->cursor;
+		$pk->windowId = ContainerIds::CURSOR;
 		$this->getHolder()->dataPacket($pk);
 	}
 
@@ -384,56 +384,17 @@ class PlayerInventory extends BaseInventory{
 			$this->onSlotChange($index, $old, $send);
 
 			return true;
-		}else{
-			switch($index){
-				case self::CRAFT_INDEX_0:
-				case self::CRAFT_INDEX_1:
-				case self::CRAFT_INDEX_2:
-				case self::CRAFT_INDEX_3:
-				case self::CRAFT_INDEX_4:
-				case self::CRAFT_INDEX_5:
-				case self::CRAFT_INDEX_6:
-				case self::CRAFT_INDEX_7:
-				case self::CRAFT_INDEX_8:
-					$slot = self::CRAFT_INDEX_0 - $index;
-					$this->craftSlots[$slot] = $item;
-					if ($send){
-						/** @todo add packet sending */
-						$pk = new InventorySlotPacket();
-						$pk->windowId = ContainerIds::NONE;
-						$pk->inventorySlot = 0;
-						$pk->item = Item::get(Item::WOOL, 10);
-						$this->holder->dataPacket($pk);
-					}
-					break;
-				case self::CRAFT_RESULT_INDEX:
-					$this->craftResult = $item;
-					if ($send){
-						/** @todo add packet sending */
-					}
-					break;
-			}
+		}elseif($index === self::CURSOR_INDEX){
+			$this->cursor = $item;
+			if($send)
+				$this->sendCursor();
 			return true;
 		}
 	}
 
 	public function getItem(int $index): Item {
-		if ($index < 0) {
-			switch($index){
-				case self::CRAFT_INDEX_0:
-				case self::CRAFT_INDEX_1:
-				case self::CRAFT_INDEX_2:
-				case self::CRAFT_INDEX_3:
-				case self::CRAFT_INDEX_4:
-				case self::CRAFT_INDEX_5:
-				case self::CRAFT_INDEX_6:
-				case self::CRAFT_INDEX_7:
-				case self::CRAFT_INDEX_8:
-					$slot = self::CRAFT_INDEX_0 - $index;
-					return $this->craftSlots[$slot] == null ? Item::get(Item::AIR, 0, 0) : clone $this->craftSlots[$slot];
-				case self::CRAFT_RESULT_INDEX:
-					return $this->craftResult == null ? Item::get(Item::AIR, 0, 0) : clone $this->craftResult;
-			}
+		if($index === self::CURSOR_INDEX){
+			return $this->cursor === null ? Item::get(Item::AIR) : clone $this->cursor;
 		}else{
 			return parent::getItem($index);
 		}
@@ -583,7 +544,7 @@ class PlayerInventory extends BaseInventory{
 	public function sendCreativeContents(){
 		$pk = new InventoryContentPacket();
 		$pk->windowId = ContainerIds::CREATIVE;
-		if($this->getHolder()->getGamemode() === Player::CREATIVE){
+		if(!$this->holder->isSpectator()){
 			foreach(Item::getCreativeItems() as $i => $item){
 				$pk->items[$i] = clone $item;
 			}

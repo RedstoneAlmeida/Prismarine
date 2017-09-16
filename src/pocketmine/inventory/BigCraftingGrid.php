@@ -21,42 +21,13 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block;
+namespace pocketmine\inventory;
 
-use pocketmine\inventory\BigCraftingGrid;
-use pocketmine\item\Item;
-use pocketmine\item\Tool;
-use pocketmine\Player;
+class BigCraftingGrid extends CraftingGrid{
 
-class CraftingTable extends Solid{
+	const RESULT_INDEX = 10;
 
-	protected $id = self::CRAFTING_TABLE;
-
-	public function __construct(int $meta = 0){
-		$this->meta = $meta;
-	}
-
-	public function getHardness() : float{
-		return 2.5;
-	}
-
-	public function getName() : string{
-		return "Crafting Table";
-	}
-
-	public function getToolType() : int{
-		return Tool::TYPE_AXE;
-	}
-
-	public function onActivate(Item $item, Player $player = null) : bool{
-		if($player instanceof Player){
-			$player->setCraftingGrid(new BigCraftingGrid($player));
-		}
-
-		return true;
-	}
-
-	public function getFuelTime() : int{
-		return 300;
+	public function getDefaultSize() : int{
+		return 10;
 	}
 }

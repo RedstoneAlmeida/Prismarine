@@ -25,6 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\transaction\action\CreativeInventoryAction;
 use pocketmine\inventory\transaction\action\DropItemAction;
@@ -185,6 +186,10 @@ class InventoryTransactionPacket extends DataPacket{
 					$inventorySlot += 36;
 					$containerId = ContainerIds::INVENTORY;
 				}
+				if($containerId === ContainerIds::CURSOR){
+					$inventorySlot = PlayerInventory::CURSOR_INDEX;
+					$containerId = ContainerIds::INVENTORY;
+				}
 				return new SlotChangeAction($sourceItem, $targetItem, $containerId, $inventorySlot);
 			case self::SOURCE_WORLD:
 				if($inventorySlot !== self::ACTION_MAGIC_SLOT_DROP_ITEM){
@@ -202,14 +207,14 @@ class InventoryTransactionPacket extends DataPacket{
 				}
 			case self::SOURCE_CRAFT:
 				switch($action){
-					case self::ACTION_CRAFT_GET_RESULT:
-						$slot = PlayerInventory::CRAFT_RESULT_INDEX;
+					case self::SOURCE_TYPE_CRAFTING_RESULT:
+						$slot = CraftingGrid::RESULT_INDEX;
 						break;
 					default:
-						$slot = PlayerInventory::CRAFT_INDEX_0 - $inventorySlot;
+						$slot = $inventorySlot;
 						break;
 				}
-				return new SlotChangeAction($sourceItem, $targetItem, ContainerIds::INVENTORY, $slot);
+				return new SlotChangeAction($sourceItem, $targetItem, CraftingGrid::WINDOW_ID, $slot);
 			default:
 				throw new \UnexpectedValueException("Unknown source type $sourceType");
 		}

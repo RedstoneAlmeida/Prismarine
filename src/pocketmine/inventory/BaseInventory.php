@@ -29,6 +29,7 @@ use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\protocol\InventoryContentPacket;
 use pocketmine\network\mcpe\protocol\InventorySlotPacket;
+use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\Player;
 use pocketmine\Server;
 
@@ -72,7 +73,9 @@ abstract class BaseInventory implements Inventory{
 	 * Returns the Minecraft PE inventory type used to show the inventory window to clients.
 	 * @return int
 	 */
-	abstract public function getNetworkType() : int;
+	public function getNetworkType() : int{
+		return ContainerIds::NONE;
+	}
 
 	/**
 	 * Returns the size of the inventory.
