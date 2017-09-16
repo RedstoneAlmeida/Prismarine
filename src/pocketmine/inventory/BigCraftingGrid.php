@@ -28,6 +28,6 @@ class BigCraftingGrid extends CraftingGrid{
 	const RESULT_INDEX = 10;
 
 	public function getDefaultSize() : int{
-		return 10;
+		return 9;
 	}
 }
