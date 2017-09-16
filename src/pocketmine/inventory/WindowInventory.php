@@ -41,7 +41,7 @@ class WindowInventory extends CustomInventory{
     public function __construct(Player $player, string $customName = "") {
         $this->customName = $customName;
         $holder = new WindowHolder($player->getFloorX(), $player->getFloorY() - 3, $player->getFloorZ(), $this);
-        parent::__construct($holder, InventoryType::get(InventoryType::CHEST));
+        parent::__construct($holder);
     }
 
     public function getNetworkType() : int{
@@ -49,7 +49,7 @@ class WindowInventory extends CustomInventory{
     }
 
     public function getName() : string{
-        return $this->customName;
+        return "Chest";
     }
 
     public function getDefaultSize() : int{
