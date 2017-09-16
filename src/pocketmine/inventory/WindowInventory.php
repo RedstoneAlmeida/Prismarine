@@ -24,12 +24,13 @@ namespace pocketmine\inventory;
 use pocketmine\Player;
 use pocketmine\block\Block;
 use pocketmine\math\Vector3;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\NBT;
-use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\protocol\BlockEntityDataPacket;
+use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
 
@@ -41,6 +42,18 @@ class WindowInventory extends CustomInventory{
         $this->customName = $customName;
         $holder = new WindowHolder($player->getFloorX(), $player->getFloorY() - 3, $player->getFloorZ(), $this);
         parent::__construct($holder, InventoryType::get(InventoryType::CHEST));
+    }
+
+    public function getNetworkType() : int{
+        return WindowTypes::CONTAINER;
+    }
+
+    public function getName() : string{
+        return $this->customName;
+    }
+
+    public function getDefaultSize() : int{
+        return 27;
     }
 
     public function onOpen(Player $who){
