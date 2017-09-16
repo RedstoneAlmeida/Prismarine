@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\entity;
 
 use pocketmine\block\Block;
+use pocketmine\entity\Effect;
 use pocketmine\event\entity\EntityDamageByChildEntityEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -350,18 +351,19 @@ abstract class Living extends Entity implements Damageable{
 		if($source instanceof EntityDamageByEntityEvent){
 			$damager = $source->getDamager();
 			if($damager instanceof Player){
-				if(!$damager->isOnGround()){
+				if(!$damager->isOnGround() and !$damager->isSprinting() and !$damager->hasEffect(Effect::BLINDNESS)){
 					//Critical hit
 					for($i = 0; $i < 5; $i++){
 						$this->level->addParticle(new CriticalParticle(new Vector3($this->x + mt_rand(-15, 15) / 10, $this->y + mt_rand(0, 20) / 10, $this->z + mt_rand(-15, 15) / 10)));
 					}
-					if($source->getDamage() <= 20){
-						$source->setDamage($source->getDamage() + mt_rand(1,3), EntityDamageEvent::MODIFIER_CRITICAL);
-					} else {
-						$source->setDamage($source->getDamage(), EntityDamageEvent::MODIFIER_CRITICAL);
-					}
+					$source->setDamage($source->getDamage() / 2, EntityDamageEvent::MODIFIER_CRITICAL);
 				}
 			}
+		}
+
+		if($source->getCause() === EntityDamageEvent::CAUSE_FALL and $this->level->getBlockIdAt($this->getFloorX(), $this->getFloorY() - 1, $this->getFloorZ()) === Block::SLIME_BLOCK and !$this->isSneaking()){
+			$this->resetFallDistance();
+			return;
 		}
 
 		parent::attack($damage, $source);

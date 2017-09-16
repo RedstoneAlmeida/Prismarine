@@ -23,9 +23,12 @@ declare(strict_types=1);
 
 namespace pocketmine\entity;
 
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityEnderPearlEvent;
 use pocketmine\level\Level;
+use pocketmine\level\particle\PortalParticle;
 use pocketmine\level\sound\EndermanTeleportSound;
+use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\AddEntityPacket;
 use pocketmine\Player;
@@ -61,6 +64,13 @@ class EnderPearl extends Projectile{
 				$ev = new EntityEnderPearlEvent($this->shootingEntity, $this);
 				Server::getInstance()->getPluginManager()->callEvent($ev);
 				if(!$ev->isCancelled()){
+					if($this->shootingEntity->isSurvival()){
+						$ev = new EntityDamageEvent($this->shootingEntity, EntityDamageEvent::CAUSE_FALL, 5);
+						$this->shootingEntity->attack($ev->getFinalDamage(), $ev);
+					}
+					for($i = 0; $i < 5; $i++){
+						$this->shootingEntity->getLevel()->addParticle(new PortalParticle(new Vector3($this->shootingEntity->x + mt_rand(-15, 15) / 10, $this->shootingEntity->y + mt_rand(0, 20) / 10, $this->shootingEntity->z + mt_rand(-15, 15) / 10)));
+					}
 					$this->shootingEntity->getLevel()->addSound(new EndermanTeleportSound($this->getPosition()), [$this->shootingEntity]);
 					$this->shootingEntity->teleport($this->getPosition());
 				}

@@ -124,6 +124,13 @@ class Potion extends Item{
 		return true;
 	}
 
+	/**
+	 * @return int
+	 */
+	public function getMaxStackSize() : int{
+		return 1;
+	}
+
 	public function onConsume(Entity $entity){
 		foreach($this->getEffects() as $effect){
 			$entity->addEffect($effect[0]);
