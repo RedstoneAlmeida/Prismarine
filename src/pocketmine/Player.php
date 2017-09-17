@@ -3973,7 +3973,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	public function setIdentifier(string $identifier){
 		if($this->identifier !== ""){
-			throw new \BadMethodCallException("Trying to change player's identifier");;
+			throw new \BadMethodCallException("Trying to change player's identifier");
 		}
 		$this->identifier = $identifier;
 	}
