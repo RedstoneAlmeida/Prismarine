@@ -128,6 +128,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->players[$identifier] = $player;
 		$this->identifiersACK[$identifier] = 0;
 		$this->identifiers[spl_object_hash($player)] = $identifier;
+		$player->setIdentifier($identifier);
 		$this->server->addPlayer($identifier, $player);
 	}
 
@@ -240,5 +241,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$data->setBuffer($buffer, 1);
 
 		return $data;
+	}
+
+	public function putReadyPacket($buffer) {
+		$this->interface->sendReadyEncapsulated($buffer);
 	}
 }

@@ -208,6 +208,9 @@ class Server{
 	/** @var Network */
 	private $network;
 
+	/** @var RakLibInterface */
+	private $mainInterface;
+
 	private $networkCompressionAsync = true;
 	public $networkCompressionLevel = 7;
 
@@ -1638,7 +1641,7 @@ class Server{
 			register_shutdown_function([$this, "crashDump"]);
 
 			$this->queryRegenerateTask = new QueryRegenerateEvent($this, 5);
-			$this->network->registerInterface(new RakLibInterface($this));
+			$this->network->registerInterface($this->mainInterface = new RakLibInterface($this));
 
 			$this->pluginManager->loadPlugins($this->pluginPath);
 
@@ -2408,6 +2411,13 @@ class Server{
 	 */
 	public function getNetwork(){
 		return $this->network;
+	}
+
+	/**
+	 * @return RakLibInterface
+	 */
+	public function getMainInterface() : RakLibInterface{
+		return $this->mainInterface;
 	}
 
 	/**

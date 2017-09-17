@@ -309,6 +309,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/** @var int|null */
 	protected $lineHeight = null;
 
+	/** @var string */
+	protected $identifier = "";
+
 	/**
 	 * @return TranslationContainer|string
 	 */
@@ -3956,6 +3959,23 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->windows->detach($this->windowIndex[$id]);
 			unset($this->windowIndex[$id]);
 		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getIdentifier() : string{
+		return $this->identifier;
+	}
+
+	/**
+	 * @param string $identifier
+	 */
+	public function setIdentifier(string $identifier){
+		if($this->identifier !== ""){
+			throw new \BadMethodCallException("Trying to change player's identifier");;
+		}
+		$this->identifier = $identifier;
 	}
 
 	public function setMetadata(string $metadataKey, MetadataValue $newMetadataValue){

@@ -210,6 +210,9 @@ class Level implements ChunkManager, Metadatable{
 
 	private $autoSave = true;
 
+	/** @var PacketMaker */
+	private $packetMaker;
+
 	/** @var BlockMetadataStore */
 	private $blockMetadata;
 
@@ -355,6 +358,8 @@ class Level implements ChunkManager, Metadatable{
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
 		$this->tickRate = 1;
+
+		$this->packetMaker = new PacketMaker($this->getServer()->getLoader());
 	}
 
 	public function getTickRate() : int{
@@ -696,6 +701,12 @@ class Level implements ChunkManager, Metadatable{
 
 		$this->unloadChunks();
 
+		while(strlen($str = $this->packetMaker->readThreadToMainPacket()) > 0){
+			foreach(unserialize($str) as $pk){
+				$this->server->getMainInterface()->putReadyPacket($pk);
+			}
+		}
+
 		//Do block updates
 		$this->timings->doTickPending->startTiming();
 
@@ -777,8 +788,13 @@ class Level implements ChunkManager, Metadatable{
 		foreach($this->chunkPackets as $index => $entries){
 			Level::getXZ($index, $chunkX, $chunkZ);
 			$chunkPlayers = $this->getChunkPlayers($chunkX, $chunkZ);
-			if(count($chunkPlayers) > 0){
-				$this->server->batchPackets($chunkPlayers, $entries, false, false);
+			$targets = [];
+			foreach($chunkPlayers as $player){
+				$targets[] = $player->getIdentifier();
+			}
+			if(count($targets) > 0){
+				$entry = new PacketMakerEntry($entries, $targets, $this->server->networkCompressionLevel);
+				$this->packetMaker->pushMainToThreadPacket(serialize($entry));
 			}
 		}
 
