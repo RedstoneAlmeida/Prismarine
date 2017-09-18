@@ -62,11 +62,15 @@ class PacketMaker extends Worker{
 		$this->internalQueue[] = $data;
 	}
 
+	public function pushThreadToMainPacket(string $data){
+		$this->externalQueue[] = $data;
+	}
+
 	public function readMainToThreadPacket() : string{
-		return $this->internalQueue->shift() ?? "";
+		return ($data = $this->internalQueue->shift()) !== null ? $data : "";
 	}
 	public function readThreadToMainPacket() : string{
-		return $this->externalQueue->shift() ?? "";
+		return ($data = $this->externalQueue->shift()) !== null ? $data : "";
 	}
 
 	protected function tickProcessor(){
@@ -74,8 +78,8 @@ class PacketMaker extends Worker{
 			$start = microtime(true);
 			$this->tick();
 			$time = microtime(true) - $start;
-			if ($time < 0.025) {
-				time_sleep_until(microtime(true) + 0.025 - $time);
+			if($time < 0.05){
+				time_sleep_until(microtime(true) + (0.05 - $time));
 			}
 		}
 	}
@@ -109,7 +113,7 @@ class PacketMaker extends Worker{
 			$result[] = $this->makeBuffer($target, $pk, false, false);
 		}
 		if(!empty($result)){
-			$this->externalQueue[] = serialize($result);
+			$this->pushThreadToMainPacket(serialize($result));
 		}
 	}
 
