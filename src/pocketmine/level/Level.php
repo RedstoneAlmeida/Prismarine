@@ -63,6 +63,7 @@ use pocketmine\event\level\LevelUnloadEvent;
 use pocketmine\event\level\SpawnChangeEvent;
 use pocketmine\event\LevelTimings;
 use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\event\server\PacketMakerEvent;
 use pocketmine\event\Timings;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
@@ -360,6 +361,8 @@ class Level implements ChunkManager, Metadatable{
 		$this->tickRate = 1;
 
 		if($this->getServer()->isPerLevelPacketMaker()){
+		    $ev = new PacketMakerEvent(PacketMakerEvent::PACKET_MAKER_SET, true);
+            $this->getServer()->getPluginManager()->callEvent($ev);
 			$this->packetMaker = new PacketMaker($this->getServer()->getLoader());
 		}else{
 			$this->packetMaker = $this->getServer()->getPacketMaker();
@@ -797,6 +800,8 @@ class Level implements ChunkManager, Metadatable{
 				$targets[] = $player->getIdentifier();
 			}
 			if(count($targets) > 0){
+			    $ev = new PacketMakerEvent(PacketMakerEvent::PACKET_MAKER_SEND_PACKET, $this->getServer()->isPerLevelPacketMaker());
+                $this->getServer()->getPluginManager()->callEvent($ev);
 				$entry = new PacketMakerEntry($entries, $targets, $this->server->networkCompressionLevel);
 				$this->packetMaker->pushMainToThreadPacket(serialize($entry));
 			}

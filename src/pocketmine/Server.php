@@ -40,6 +40,7 @@ use pocketmine\event\HandlerList;
 use pocketmine\event\level\LevelInitEvent;
 use pocketmine\event\level\LevelLoadEvent;
 use pocketmine\event\player\PlayerDataSaveEvent;
+use pocketmine\event\server\PacketMakerEvent;
 use pocketmine\event\server\QueryRegenerateEvent;
 use pocketmine\event\server\ServerCommandEvent;
 use pocketmine\event\TextContainer;
@@ -1658,6 +1659,8 @@ class Server{
 			$this->allowInventoryCheats = $this->getAdvancedProperty("inventory.allow-cheats", false);
 			$this->perLevelPacketMaker = $this->getAdvancedProperty("packetMaker.per-world", false);
 			if(!$this->perLevelPacketMaker){
+			    $ev = new PacketMakerEvent(PacketMakerEvent::PACKET_MAKER_SET, false);
+                $this->getPluginManager()->callEvent($ev);
 				$this->packetMaker = new PacketMaker($this->getLoader());
 			}
 			$this->pluginManager->registerInterface(PharPluginLoader::class);
