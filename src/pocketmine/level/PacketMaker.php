@@ -85,9 +85,8 @@ class PacketMaker extends Worker{
 	}
 
 	protected function tick(){	
-		while(count($this->internalQueue) > 0){
-			$data = unserialize($this->readMainToThreadPacket());
-			$this->checkPacket($data);
+		while(strlen($str = $this->readMainToThreadPacket()) > 0){
+			$this->checkPacket(unserialize($str));
 		}
 	}
 	
