@@ -27,6 +27,9 @@ declare(strict_types=1);
  */
 namespace pocketmine;
 
+use pocketmine\api\script\Script;
+use pocketmine\api\script\ScriptLoader;
+use pocketmine\api\script\ScriptManager;
 use pocketmine\block\Block;
 use pocketmine\command\CommandReader;
 use pocketmine\command\CommandSender;
@@ -707,6 +710,18 @@ class Server{
 	public function getCommandMap(){
 		return $this->commandMap;
 	}
+
+    /**
+     * @return ScriptManager
+     */
+    public function getScriptManager(): ScriptManager
+    {
+        return $this->scriptManager;
+    }
+
+    public function processScriptCustomMethod(){
+        return $this->getScriptManager()->init(ScriptLoader::ON_CUSTOM);
+    }
 
 	/**
 	 * @return Player[]
@@ -1439,6 +1454,8 @@ class Server{
 		}, $microseconds);
 	}
 
+	private $scriptManager;
+
 	/**
 	 * @param \ClassLoader    $autoloader
 	 * @param \ThreadedLogger $logger
@@ -1650,6 +1667,8 @@ class Server{
 			Attribute::init();
 			$this->craftingManager = new CraftingManager();
 
+            $this->scriptManager = new ScriptManager($this);
+
 			$this->resourceManager = new ResourcePackManager($this, $this->getDataPath() . "resource_packs" . DIRECTORY_SEPARATOR);
 
 			$this->pluginManager = new PluginManager($this, $this->commandMap);
@@ -1672,6 +1691,9 @@ class Server{
 			$this->network->registerInterface($this->mainInterface = new RakLibInterface($this));
 
 			$this->pluginManager->loadPlugins($this->pluginPath);
+
+
+            $this->scriptManager->init();
 
 			$this->enablePlugins(PluginLoadOrder::STARTUP);
 
@@ -1742,8 +1764,8 @@ class Server{
 			}
 
 			$this->enablePlugins(PluginLoadOrder::POSTWORLD);
-
 			$this->start();
+            $this->scriptManager->init(ScriptLoader::ON_STOP);
 		}catch(\Throwable $e){
 			$this->exceptionHandler($e);
 		}
@@ -2129,6 +2151,9 @@ class Server{
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
 	public function start(){
+
+        $this->scriptManager->init(ScriptLoader::ON_START);
+
 		if($this->getConfigBoolean("enable-query", true) === true){
 			$this->queryHandler = new QueryHandler();
 		}
