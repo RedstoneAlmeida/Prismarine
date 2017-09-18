@@ -359,7 +359,11 @@ class Level implements ChunkManager, Metadatable{
 		$this->temporalVector = new Vector3(0, 0, 0);
 		$this->tickRate = 1;
 
-		$this->packetMaker = new PacketMaker($this->getServer()->getLoader());
+		if($this->getServer()->isPerLevelPacketMaker()){
+			$this->packetMaker = new PacketMaker($this->getServer()->getLoader());
+		}else{
+			$this->packetMaker = $this->getServer()->getPacketMaker();
+		}
 	}
 
 	public function getTickRate() : int{

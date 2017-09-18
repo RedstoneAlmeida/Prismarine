@@ -65,6 +65,7 @@ use pocketmine\level\generator\hell\Nether;
 use pocketmine\level\generator\normal\Normal;
 use pocketmine\level\Level;
 use pocketmine\level\LevelException;
+use pocketmine\level\PacketMaker;
 use pocketmine\metadata\EntityMetadataStore;
 use pocketmine\metadata\LevelMetadataStore;
 use pocketmine\metadata\PlayerMetadataStore;
@@ -269,6 +270,12 @@ class Server{
 	private $levelDefault = null;
 
 	public $allowInventoryCheats = false;
+
+	/** @var PacketMaker|null */
+	protected $packetMaker = null;
+
+	/** @var bool */
+	protected $perLevelPacketMaker = false;
 
 	/**
 	 * @return string
@@ -529,6 +536,20 @@ class Server{
 	 */
 	public function getDifficulty() : int{
 		return $this->getConfigInt("difficulty", 1);
+	}
+
+	/**
+	 * @return PacketMaker|null
+	 */
+	public function getPacketMaker(){
+		return $this->packetMaker;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isPerLevelPacketMaker() : bool{
+		return $this->perLevelPacketMaker;
 	}
 
 	/**
@@ -1635,6 +1656,10 @@ class Server{
 			$this->pluginManager->setUseTimings($this->getProperty("settings.enable-profiling", false));
 			$this->profilingTickRate = (float) $this->getProperty("settings.profile-report-trigger", 20);
 			$this->allowInventoryCheats = $this->getAdvancedProperty("inventory.allow-cheats", false);
+			$this->perLevelPacketMaker = $this->getAdvancedProperty("packetMaker.per-world", false);
+			if(!$this->perLevelPacketMaker){
+				$this->packetMaker = new PacketMaker($this->getLoader());
+			}
 			$this->pluginManager->registerInterface(PharPluginLoader::class);
 			$this->pluginManager->registerInterface(ScriptPluginLoader::class);
 
