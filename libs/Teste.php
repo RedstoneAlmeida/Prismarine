@@ -3,6 +3,8 @@
 use pocketmine\api\script\Script;
 use pocketmine\Server;
 use pocketmine\command\CommandSender;
+use pocketmine\event\Event;
+use pocketmine\event\player\PlayerJoinEvent;
 
 class Teste extends Script implements \pocketmine\event\Listener
 {
@@ -57,5 +59,15 @@ class Teste extends Script implements \pocketmine\event\Listener
     public function commandFunction(CommandSender $sender, string $commandName, array $args, Server $server)
     {
 
+    }
+
+    public function processEvents(Event $event)
+    {
+        switch(true){
+            case $event instanceof PlayerJoinEvent:
+                $event->getPlayer()->sendMessage("teste");
+                break;
+        }
+        return;
     }
 }
