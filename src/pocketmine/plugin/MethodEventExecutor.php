@@ -23,8 +23,10 @@ declare(strict_types=1);
 
 namespace pocketmine\plugin;
 
+use pocketmine\api\script\ScriptLoader;
 use pocketmine\event\Event;
 use pocketmine\event\Listener;
+use pocketmine\Server;
 
 class MethodEventExecutor implements EventExecutor{
 

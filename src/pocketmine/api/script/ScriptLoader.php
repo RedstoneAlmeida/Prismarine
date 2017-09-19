@@ -9,6 +9,7 @@
 namespace pocketmine\api\script;
 
 
+use pocketmine\event\Event;
 use pocketmine\Server;
 
 class ScriptLoader
@@ -18,6 +19,7 @@ class ScriptLoader
     const ON_START = 1;
     const ON_STOP = 2;
     const ON_CUSTOM = 3;
+    const ON_EVENT = 4;
 
     /**
      * @var Script
@@ -29,7 +31,7 @@ class ScriptLoader
         $this->script = $script;
     }
 
-    public function process(int $loads){
+    public function process(int $loads, Event $event = null){
         $script = $this->script;
         switch($loads){
             case self::ON_LOAD:
@@ -43,6 +45,11 @@ class ScriptLoader
                 break;
             case self::ON_CUSTOM:
                 $script->onCustom(Server::getInstance());
+                break;
+            case self::ON_EVENT:
+                if($event != null) {
+                    $script->processEvents($event);
+                }
                 break;
         }
     }

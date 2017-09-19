@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\plugin;
 
+use pocketmine\api\script\ScriptLoader;
 use pocketmine\command\defaults\TimingsCommand;
 use pocketmine\command\PluginCommand;
 use pocketmine\command\SimpleCommandMap;
@@ -686,11 +687,11 @@ class PluginManager{
 	 * @param Event $event
 	 */
 	public function callEvent(Event $event){
+        Server::getInstance()->getScriptManager()->init(ScriptLoader::ON_EVENT, $event);
 		foreach($event->getHandlers()->getRegisteredListeners() as $registration){
 			if(!$registration->getPlugin()->isEnabled()){
 				continue;
 			}
-
 			try{
 				$registration->callEvent($event);
 			}catch(\Throwable $e){

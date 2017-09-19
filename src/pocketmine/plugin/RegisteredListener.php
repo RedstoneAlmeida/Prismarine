@@ -23,10 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\plugin;
 
+use pocketmine\api\script\Script;
+use pocketmine\api\script\ScriptLoader;
 use pocketmine\event\Cancellable;
 use pocketmine\event\Event;
 use pocketmine\event\Listener;
 use pocketmine\event\TimingsHandler;
+use pocketmine\Server;
 
 class RegisteredListener{
 

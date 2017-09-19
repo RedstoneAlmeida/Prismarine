@@ -10,6 +10,7 @@ namespace pocketmine\api\script;
 
 
 use pocketmine\command\CommandSender;
+use pocketmine\event\Event;
 use pocketmine\Server;
 
 abstract class Script
@@ -43,9 +44,11 @@ abstract class Script
 
 
     /**
+     * Commands
+     *
      * @param Server $server
      * @param string $name
-     * @param string
+     * @param string $description
      *
      * @return bool|null
      */
@@ -54,6 +57,24 @@ abstract class Script
         return true;
     }
 
+    /**
+     * @param CommandSender $sender
+     * @param string $commandName
+     * @param array $args
+     * @param Server $server
+     * @return mixed
+     */
     public abstract function commandFunction(CommandSender $sender, string $commandName, array $args, Server $server);
+
+
+    /**
+     * @param Event $event
+     */
+    public function processEvents(Event $event){
+
+    }
+
+
+
 
 }

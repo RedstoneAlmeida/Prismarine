@@ -9,6 +9,7 @@
 namespace pocketmine\api\script;
 
 
+use pocketmine\event\Event;
 use pocketmine\Server;
 use pocketmine\utils\Config;
 
@@ -22,7 +23,7 @@ class ScriptManager
         $this->server = $server;
     }
 
-    public function init(int $loads = 0){
+    public function init(int $loads = 0, Event $event = null){
         $server = $this->server;
         $path = $server->getDataPath() . "libs/";
         @mkdir($path, 777);
@@ -32,7 +33,7 @@ class ScriptManager
                 $class = new $class();
                 if($class instanceof Script){
                     $loader = new ScriptLoader($class);
-                    $loader->process($loads);
+                    $loader->process($loads, $event);
                 }
             }
         }
